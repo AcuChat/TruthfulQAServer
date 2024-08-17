@@ -78,12 +78,20 @@ const initializeTable = async () => {
             ${type}, ${category}, ${question}, ${best_answer}, ${correct_answers}, ${incorrect_answers}, ${source}
         )`
 
-        console.log(question);
         const r = await this.query(q);
     }
 }
 
 const wikipediaQuestions = async () => {
+    const q = `SELECT id, question, source FROM questions WHERE source LIKE '%wikipedia%'`;
+    const r = await this.query(q);
 
+    return r;
 }
-createTables();
+
+const test = async () => {
+    const wiki = await wikipediaQuestions();
+    console.log(wiki);
+}
+
+test();
