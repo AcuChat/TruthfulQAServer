@@ -18,7 +18,7 @@ const mysqlOptions = {
     keepAliveInitialDelay: 0
   }
   
-  const execAsync = promisify(exec);
+  //const execAsync = promisify(exec);
   
   exports.escape = str => mysql.escape(str)
   
@@ -35,4 +35,23 @@ const mysqlOptions = {
       });
     })
   }
+
+  const createTable = async () => {
+    const q = `CREATE TABLE IF NOT EXISTS questions (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        type VARCHAR(64) NOT NULL,
+        category VARCHAR(128) NOT NULL,
+        question VARCHAR(512) NOT NULL,
+        best_answer MEDIUMTEXT,
+        correct_answers MEDIUMTEXT,
+        incorrect_answers MEDIUMTEXT,
+        source VARCHAR(2056) NOT NULL,
+        acurai_response VARCHAR (4096) NOT NULL DEFAULT '',
+        status VARCHAR(64) DEFAULT 'init'
+    )`;
+
+    const r = await this.query(q);
+  }
+
+  createTable();
   
