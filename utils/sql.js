@@ -37,8 +37,8 @@ const mysqlOptions = {
     })
   }
 
-const createTable = async () => {
-    const q = `CREATE TABLE IF NOT EXISTS questions (
+const createTables = async () => {
+    let q = `CREATE TABLE IF NOT EXISTS questions (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         type VARCHAR(64) NOT NULL,
         category VARCHAR(128) NOT NULL,
@@ -51,7 +51,16 @@ const createTable = async () => {
         status VARCHAR(64) DEFAULT 'init'
     )`;
 
-    const r = await this.query(q);
+    let r = await this.query(q);
+
+    q = `CREATE TABLE IF NOT EXISTS sources (
+        id BIGINT NOT NULL PRIMARY KEY,
+        raw_content MEDIUMTEXT,
+        content MEDIUMTEXT,
+        relevant_sentences MEDIUMTEXT
+    )`
+
+    r = await this.query(q);
 }
 
 const initializeTable = async () => {
@@ -74,6 +83,7 @@ const initializeTable = async () => {
     }
 }
 
-    initializeTable();
-  //createTable();
-  
+const wikipediaQuestions = async () => {
+
+}
+createTables();
