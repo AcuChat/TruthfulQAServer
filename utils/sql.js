@@ -1,5 +1,6 @@
 require('dotenv').config();
 const mysql = require('mysql2');
+const data = require('../TruthfulQA_generation.json');
 
 const { MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, MYSQL_PORT, JWT_PASSWORD } = process.env;
 
@@ -36,7 +37,7 @@ const mysqlOptions = {
     })
   }
 
-  const createTable = async () => {
+const createTable = async () => {
     const q = `CREATE TABLE IF NOT EXISTS questions (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         type VARCHAR(64) NOT NULL,
@@ -51,7 +52,28 @@ const mysqlOptions = {
     )`;
 
     const r = await this.query(q);
-  }
+}
 
-  createTable();
+const initializeTable = async () => {
+    const { validation } = data;
+    for (let i = 0; i < validation.type.length; ++i) {
+        const type = this.escape(validation.type[i]);
+        const category = this.escape(validation.category[i]);
+        const question = this.escape(validation.question[i]);
+        const best_answer = this.escape(validation.best_answer[i]);
+        const correct_answers = this.escape(JSON.stringify(validation.correct_answers[i]));
+        const incorrect_answers = this.escape(JSON.stringify(validation.incorrect_answers[i]));
+        const source = this.escape(validation.source[i]);
+
+        const q = `INSERT INTO questions (type, category, question, best_answer, correct_answers, incorrect_answers, source) VALUES (
+            ${type}, ${category}, ${question}, ${best_answer}, ${correct_answers}, ${incorrect_answers}, ${source}
+        )`
+
+        console.log(question);
+        const r = await this.query(q);
+    }
+}
+
+    initializeTable();
+  //createTable();
   
