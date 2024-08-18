@@ -56,8 +56,7 @@ const createTables = async () => {
     q = `CREATE TABLE IF NOT EXISTS sources (
         id BIGINT NOT NULL PRIMARY KEY,
         raw_content MEDIUMTEXT,
-        content MEDIUMTEXT,
-        relevant_sentences MEDIUMTEXT
+        content MEDIUMTEXT
     )`
 
     r = await this.query(q);
@@ -82,16 +81,9 @@ const initializeTable = async () => {
     }
 }
 
-const wikipediaQuestions = async () => {
+exports.wikipediaQuestions = async () => {
     const q = `SELECT id, question, source FROM questions WHERE source LIKE '%wikipedia%'`;
     const r = await this.query(q);
 
     return r;
 }
-
-const test = async () => {
-    const wiki = await wikipediaQuestions();
-    console.log(wiki);
-}
-
-test();
