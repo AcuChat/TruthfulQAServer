@@ -88,4 +88,11 @@ exports.wikipediaQuestions = async () => {
     return r;
 }
 
+exports.nextUnprocessedWiki = async () => {
+    const q = `SELECT id, raw_content FROM sources WHERE content = NULL LIMIT 1`;
+    const r = await this.query(q);
+    return r;
+    
+}
+
 createTables();
