@@ -29,11 +29,16 @@ const main = async () => {
     //console.log('wiki', wiki);
 
     for (let i = 0; i < wiki.length; ++i) {
-        //const response = await axios.get(wiki[i].source);
-        //const q = `INSERT INTO sources (id, raw_content) VALUES (${wiki[i].id}, ${sql.escape(response.data)})`;
-        const url = extractWikipediaUrl(wiki[i].source);
-    
-        console.log(url);
+       
+        let url = extractWikipediaUrl(wiki[i].source);
+        url = url.replaceAll(';', '');
+        const isUrl = isValidUrl(url);
+        if (!isUrl) continue;
+
+        const response = await axios.get(url);
+        const q = `INSERT INTO sources (id, raw_content) VALUES (${wiki[i].id}, ${sql.escape(response.data)})`;
+        const r = await sql.query(q);
+        console.log(wiki[i].question, url);
     }
 }
 

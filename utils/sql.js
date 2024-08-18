@@ -87,3 +87,5 @@ exports.wikipediaQuestions = async () => {
 
     return r;
 }
+
+createTables();
