@@ -11,6 +11,7 @@
   "dependencies": {
     "axios": "^1.7.4",
     "dotenv": "^16.4.5",
-    "mysql2": "^3.11.0"
+    "mysql2": "^3.11.0",
+    "node-readability": "^3.0.0"
   }
 }
