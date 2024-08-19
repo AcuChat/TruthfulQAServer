@@ -1,5 +1,6 @@
 require('dotenv').config();
 const sql = require('./utils/sql');
+const html = require('./utils/html');
 const axios = require('axios');
 
 function extractWikipediaUrl(text) {
@@ -24,12 +25,10 @@ function isValidUrl(str) {
     }
 }
 
-const main = async () => {
+const storeWikiHtml = async () => {
     const wiki = await sql.wikipediaQuestions();
-    //console.log('wiki', wiki);
-
-    for (let i = 0; i < wiki.length; ++i) {
-       
+   
+    for (let i = 0; i < wiki.length; ++i) {    
         let url = extractWikipediaUrl(wiki[i].source);
         url = url.replaceAll(';', '');
         const isUrl = isValidUrl(url);
@@ -38,8 +37,24 @@ const main = async () => {
         const response = await axios.get(url);
         const q = `INSERT INTO sources (id, raw_content) VALUES (${wiki[i].id}, ${sql.escape(response.data)})`;
         const r = await sql.query(q);
-        console.log(wiki[i].question, url);
     }
 }
 
+
+
+const main = async () => {
+    while (true) {
+        const wiki = await sql.nextUnprocessedWiki();
+        if (!wiki.length) return;
+        const article = await html.htmlToTextViaReadability(wiki[0].raw_content);
+        
+        const fullArticle = article.title && article.textBody ? article.title + "\n\n" + article.textBody : '';
+        if (fullArticle) {
+            const q = `UPDATE sources SET content = ${sql.escape(fullArticle)} WHERE id = ${wiki[0].id}`;
+            const r = await sql.query(q);
+            console.log('id', wiki[0].id);
+        }
+    }
+    
+}
 main();
