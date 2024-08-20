@@ -3,6 +3,7 @@ const listItemLinkRegex = /^\s*[\*\+\-]\s+\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]*)"
 const listItemLinkDepthRegex = /^(\s*)([*+-])\s+(\[)/;
 // Regular expression to match a markdown link
 const linkRegex = /^(\s*)\[([^\]]+)\]\(([^)]+)\)$/; // allows for spaces prior to the beginning of the link
+const letterRegex = /^\s*[a-zA-Z]/;
 
 function isMarkdownLink(str) {
     return markdownLinkRegex.test(str);
@@ -41,13 +42,27 @@ function getLinkDepth(line) {
     }
 }
 
+function startsWithLetter(str) {
+    return letterRegex.test(str);
+  }
+
 function getCategory (line) {
+    let test;
+
+    /** 
+     * First check if the line is simply narrative text
+     */
+    test = startsWithLetter(line);
+    if (test) return {
+        category: 'text'
+    }
+
     /**
      * Check for the category of an entire line first
      */
 
     // check if entire line is solely comprised of a link
-    let test = getLinkDepth(line);
+    test = getLinkDepth(line);
     if (test) {
         return {
             category: 'link',
@@ -73,7 +88,7 @@ function getCategory (line) {
      * Check the category of the line type
      */
 
-    
+
 
     return '';
 }
