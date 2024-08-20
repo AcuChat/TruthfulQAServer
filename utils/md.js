@@ -1,9 +1,12 @@
+const fs = require('fs');
+
 const markdownLinkRegex = /^\[([^\]]+)\]\(([^)]+)\)$/; // presumes the link starts at the beginning with no preceding spaces
 const listItemLinkRegex = /^\s*[\*\+\-]\s+\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)\s*$/;
 const listItemLinkDepthRegex = /^(\s*)([*+-])\s+(\[)/;
 // Regular expression to match a markdown link
-const linkRegex = /^(\s*)\[([^\]]+)\]\(([^)]+)\)$/; // allows for spaces prior to the beginning of the link
+const linkRegex = /^(\s*)\[([^\]]*(?:\[[^\]]*\][^\]]*)*)\]\(([^)]+)\)$/; // allows for spaces prior to the beginning of the link
 const letterRegex = /^\s*[a-zA-Z]/;
+const beginningRegex = /\S+/;
 
 function isMarkdownLink(str) {
     return markdownLinkRegex.test(str);
@@ -44,9 +47,30 @@ function getLinkDepth(line) {
 
 function startsWithLetter(str) {
     return letterRegex.test(str);
+}
+
+function parseBeginning(input) {
+    // Trim any trailing whitespace to focus only on leading whitespace
+    const trimmedInput = input.trimEnd();
+    
+    // Count the number of leading whitespace characters
+    const startingWhitespace = trimmedInput.length - trimmedInput.trimStart().length;
+    
+    // Extract the first string after initial whitespace
+    const match = trimmedInput.match(beginningRegex);
+    const string = match ? match[0] : '';
+    
+    return {
+      startingWhitespace,
+      string
+    };
   }
 
 function getCategory (line) {
+    if (!line) return {
+        category: 'blank',
+        inc: 1
+    }
     let test;
 
     /** 
@@ -54,7 +78,8 @@ function getCategory (line) {
      */
     test = startsWithLetter(line);
     if (test) return {
-        category: 'text'
+        category: 'text',
+        inc: 1
     }
 
     /**
@@ -66,6 +91,7 @@ function getCategory (line) {
     if (test) {
         return {
             category: 'link',
+            inc: 1,
             meta: {
                 depth: test
             }
@@ -77,6 +103,7 @@ function getCategory (line) {
     if (test) {
         return {
             category: 'listItemLink',
+            inc: 1,
             meta: {
                 depth: test
             }
@@ -88,7 +115,14 @@ function getCategory (line) {
      * Check the category of the line type
      */
 
+    const beginning = parseBeginning(line);
 
+    console.log('beginning', beginning);
+
+    if (beginning.string.startsWith('---')) return {
+        category: 'horizontalRule',
+        inc: 1
+    }
 
     return '';
 }
@@ -97,20 +131,30 @@ function getCategory (line) {
 
 exports.mdToAcuJson = async (md) => {
     const json = [];
+    let index = 0;
+    const mdLines = md.split("\n");
+
+    fs.writeFileSync('/home/tmp/mdToJson.txt', md, 'UTF-8');
+
+    while (index < mdLines.length) {
+        const category = getCategory(mdLines[index]);
+        if (!category) {
+            console.log("CATEGORY ERROR: ", mdLines[index]);
+            const beginning = parseBeginning(mdLines[index]);
+            console.log('Beginning: ', beginning);
+            console.log('next lines');
+            console.log(mdLines[index+1]);
+            console.log(mdLines[index+2]);
+            console.log(mdLines[index+3]);
+            console.log(mdLines[index+4]);
+            console.log(mdLines[index+5]);
+
+            return;
+        }
+        console.log("LINE:", mdLines[index]);
+        console.log(category);
+
+        index += category.inc;
+    }
     
-    // loop through lines
-
-    // get curCategory
-
-    // switch on curCategory
-        // each switch handler updates the json array and returns how many lines it processed
-
-        // default
-            // print the line that is not yet categorized and return false
-            // later 
-                // log the markdown document (the document and the line that could not be categorized)
-                // send email
-
-    // increment index by numProcessed lines
-
 }

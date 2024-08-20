@@ -64,8 +64,6 @@ const test = async () => {
     const q = `SELECT content FROM sources LIMIT 1`;
     const r = await sql.query(q);
 
-    console.log('r', r)
-
     md.mdToAcuJson(r[0].content);
 }
 
