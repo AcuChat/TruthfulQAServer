@@ -2,7 +2,7 @@ const { JSDOM } = require("jsdom");
 const { Readability } = require("@mozilla/readability");
 const TurndownService = require('turndown');
 
-exports.htmlToMarkdownViaTurndown(html) {
+exports.htmlToMarkdownViaTurndown = (html) => {
     const dom = new JSDOM(html);
     const bodyInnerHTML = dom.window.document.body.innerHTML;
     
