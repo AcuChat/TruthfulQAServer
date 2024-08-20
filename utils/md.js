@@ -50,16 +50,23 @@ function startsWithLetter(str) {
 }
 
 function parseBeginning(input) {
+    console.log(`parseBeginning(${input})`);
     // Trim any trailing whitespace to focus only on leading whitespace
-    const trimmedInput = input.trimEnd();
+    //const trimmedInput = input.trimEnd();
     
     // Count the number of leading whitespace characters
-    const startingWhitespace = trimmedInput.length - trimmedInput.trimStart().length;
-    
+    //const startingWhitespace = trimmedInput.length - trimmedInput.trimStart().length;
+    const startingWhitespace = (input.match(/^\s*/) || [''])[0].length;
+
     // Extract the first string after initial whitespace
-    const match = trimmedInput.match(beginningRegex);
+    const match = input.match(beginningRegex);
     const string = match ? match[0] : '';
     
+    console.log({
+        startingWhitespace,
+        string,
+        init: string.length ? string[0] : ''
+      })
     return {
       startingWhitespace,
       string
@@ -68,9 +75,13 @@ function parseBeginning(input) {
 
 function getCategory (line) {
     if (!line) return {
-        category: 'blank',
+        category: 'blankLine',
         inc: 1
     }
+
+    const beginning = parseBeginning(line);
+
+
     let test;
 
     /** 
@@ -115,12 +126,15 @@ function getCategory (line) {
      * Check the category of the line type
      */
 
-    const beginning = parseBeginning(line);
-
     console.log('beginning', beginning);
 
     if (beginning.string.startsWith('---')) return {
         category: 'horizontalRule',
+        inc: 1
+    }
+
+    if (beginning.startingWhitespace === 0 && beginning.string === '') return {
+        category: 'blankLine',
         inc: 1
     }
 
