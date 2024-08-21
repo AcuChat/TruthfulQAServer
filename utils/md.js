@@ -10,7 +10,8 @@ const letterRegex = /^\s*[a-zA-Z]/;
 const beginningRegex = /\S+/;
 const startsWithLetterOrBackslashRegex = /^[a-zA-Z\\]/;
 const orderedListRegex = /^[0-9]+[.)]/;
-const markdownTextRegex = /^[a-zA-Z\\~^=]/
+const markdownTextRegex = /^[a-zA-Z\\~^=]/;
+const unorderdListTextRegex = /^\s*[*+-]\s+(.*)$/;
 
 function isMarkdownLink(str) {
     return markdownLinkRegex.test(str);
@@ -70,13 +71,13 @@ function parseBeginning(input) {
         startingWhitespace,
         string,
         init: string.length ? string[0] : '',
-        next: string.length > 1 ? string[1] : ''
+       
       })
     return {
       startingWhitespace,
       string,
       init: string.length ? string[0] : '',
-      next: string.length > 1 ? string[1] : ''
+     
     };
   }
 
@@ -105,9 +106,7 @@ function handleParagraph (lines, index, beginning) {
     return {
         category: 'paragraph', // paragraph
         inc: count,
-        meta: {
-            raw: textLines.join('')
-        }
+        raw: textLines.join('')
     }
 }
 
@@ -122,6 +121,7 @@ function handleOrderedList (lines, index, beginning) {
 function handleLink (lines, index, beginning) {
     const depth = Math.floor(beginning.startingWhitespace / 4);
     const text = lines[index].substring(beginning.startingWhitespace);
+
     console.log('link text', text);
 
     
@@ -136,12 +136,35 @@ function handleLink (lines, index, beginning) {
     if (isLink) {
         return {
             category: 'Link',
+            raw: lines[index],
             inc: 1
         }
     }
     return {
         category: 'undefined',
         inc:1
+    }
+}
+
+function handleUnorderedList (lines, index, beginning) {
+    const depth = Math.floor(beginning.startingWhitespace / 4);
+    let test = listItemLinkRegex.test(lines[index]);
+    if (test) {
+        const match = lines[index].match(unorderdListTextRegex);
+        return {
+            category: 'listLink',
+            type: 'unordered',
+            raw: match ? match[1] : '',
+            inc: 1
+        }
+    }
+
+
+    console.log(`unordered text: =${text}=`);
+
+    return {
+        category: 'undefined',
+        inc: 1
     }
 }
 
@@ -171,7 +194,6 @@ function getCategory (lines, index) {
         }
     }
 
-
     console.log('switch', beginning.init, beginning);
 
     switch (beginning.init) {
@@ -180,15 +202,19 @@ function getCategory (lines, index) {
         case '-':
         case '+':
             // undordered list
+            return handleUnorderedList(lines, index, beginning);
         case '*':
-            // can be unordered list, bold, or italic
-            // if beginning.next === ' ' then unordered list
+            // if bold or italic then is category paragraph
+            if (beginning.string === '*') return handleUnorderedList(lines, index, beginning);
+            handleParagraph(lines, index, beginning);
+            
         case '_':
             // can be bold or italic
-            break;
+            return handleParagraph(lines, index, beginning)
         case '`':
-            // inline code
-            // or code block ```
+            // inline code `
+            if (beginning.next != '`') return handleParagraph(lines, index, beginning);
+            // code block ```
             break;
         case '>':
             // be sure to handle nested block quotes https://commonmark.org/help/tutorial/05-blockquotes.html
