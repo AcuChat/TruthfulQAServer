@@ -159,6 +159,7 @@ function handleUnorderedList (lines, index, beginning) {
         if (test) {
             return {
                 category: 'listLink',
+                depth,
                 type: 'unordered',
                 raw: text,
                 inc: 1
@@ -170,6 +171,7 @@ function handleUnorderedList (lines, index, beginning) {
         if (completeLink) {
             return {
                 category: 'paragraph',
+                depth,
                 raw: text,
                 inc: 1
             }
@@ -187,13 +189,15 @@ function handleUnorderedList (lines, index, beginning) {
                 if (link.length === text.length) {
                     return {
                         category: 'listLink',
+                        depth,
                         type: 'unordered',
                         raw: text,
                         inc: count
                     }
                 } 
                 return {
-                    category: 'paragraph',
+                    category: 'listItem',
+                    depth,
                     raw: text,
                     inc: count
                 }
@@ -201,6 +205,7 @@ function handleUnorderedList (lines, index, beginning) {
         }
         return {
             category: 'unparsable',
+            depth,
             raw: text,
             inc: count
         }
@@ -208,11 +213,15 @@ function handleUnorderedList (lines, index, beginning) {
 
 
 
-    // if 
+    // The unordered list does not start with a link
         console.log(`unordered text: =${text}=`);
+
+        // we need to check for line breaks
+
 
     return {
         category: 'undefined',
+        depth,
         inc: 1
     }
 }
