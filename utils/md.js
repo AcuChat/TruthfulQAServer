@@ -12,6 +12,7 @@ const startsWithLetterOrBackslashRegex = /^[a-zA-Z\\]/;
 const orderedListRegex = /^[0-9]+[.)]/;
 const markdownTextRegex = /^[a-zA-Z\\~^=]/;
 const unorderdListTextRegex = /^\s*[*+-]\s+(.*)$/;
+const stringStartsWithLinkRegex = /^\[(?:[^\[\]]|\[(?:[^\[\]]|\[(?:[^\[\]]|\[[^\[\]]*\])*\])*\])*\]\([^\s()]+(?:\s+(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\)))?\)/;
 
 function isMarkdownLink(str) {
     return markdownLinkRegex.test(str);
@@ -148,19 +149,67 @@ function handleLink (lines, index, beginning) {
 
 function handleUnorderedList (lines, index, beginning) {
     const depth = Math.floor(beginning.startingWhitespace / 4);
-    let test = listItemLinkRegex.test(lines[index]);
-    if (test) {
-        const match = lines[index].match(unorderdListTextRegex);
+    let match = lines[index].match(unorderdListTextRegex);
+    let text = match ? match[1] : '';
+
+    // Are we dealing with a link?
+    if (text[0] === '[') {
+        // if the full line is a link then we are done
+        let test = listItemLinkRegex.test(lines[index]);
+        if (test) {
+            return {
+                category: 'listLink',
+                type: 'unordered',
+                raw: text,
+                inc: 1
+            }
+        }
+
+        // If we have a complete link plus other stuff then we are done
+        let completeLink = stringStartsWithLinkRegex.test(text);
+        if (completeLink) {
+            return {
+                category: 'paragraph',
+                raw: text,
+                inc: 1
+            }
+        }
+    
+        // otherwise we have an incomplete link
+        const maxLines = 10;
+        let count = 1;
+        while (count < maxLines && (index + count) < lines.length) {
+            text += lines[index + count]; // add the next line
+            ++count;
+            match = text.match(stringStartsWithLinkRegex);
+            const link = match ? match[0] : '';
+            if (link) {
+                if (link.length === text.length) {
+                    return {
+                        category: 'listLink',
+                        type: 'unordered',
+                        raw: text,
+                        inc: count
+                    }
+                } 
+                return {
+                    category: 'paragraph',
+                    raw: text,
+                    inc: count
+                }
+            }
+        }
         return {
-            category: 'listLink',
-            type: 'unordered',
-            raw: match ? match[1] : '',
-            inc: 1
+            category: 'unparsable',
+            raw: text,
+            inc: count
         }
     }
 
 
-    console.log(`unordered text: =${text}=`);
+
+    // if 
+        console.log(`unordered text: =${text}=`);
 
     return {
         category: 'undefined',
