@@ -1,4 +1,5 @@
 const fs = require('fs');
+const plaintify = require('marked-plaintify');
 
 const markdownLinkRegex = /^\[([^\]]+)\]\(([^)]+)\)$/; // presumes the link starts at the beginning with no preceding spaces
 const listItemLinkRegex = /^\s*[\*\+\-]\s+\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)\s*$/;
@@ -76,14 +77,22 @@ function parseBeginning(input) {
     };
   }
 
-function handleText (line, beginning) {
+function handleParagraph (line, beginning) {
     /*
             Look for line breaks: https://commonmark.org/help/tutorial/03-paragraphs.html
             Text ends with a backslash or two spaces
         */
     return {
-        category: 'text',
+        category: 'paragraph',
         inc: 1
+    }
+}
+
+function handleOrderedList(lines, index, beginning) {
+
+    return {
+        category: 'undefined',
+        inc:1
     }
 }
 
@@ -96,9 +105,24 @@ function getCategory (lines, index) {
     let test;
     const beginning = parseBeginning(lines[index]);
     
-    if (startsWithLetterOrBackslashRegex.test(beginning.string)) return handleText(lines, index, beginning);
+    if (startsWithLetterOrBackslashRegex.test(beginning.string)) return handleParagraph(lines, index, beginning);
     if (orderedListRegex.test(beginning.string)) return handleOrderedList(lines, index, beginning);
     
+    if (beginning.init === '-') {
+        if (beginning.string.startsWith('---')) return {
+            category: 'horizontalRule',
+            inc: 1
+        }
+    }
+    if (beginning.init === '*') {
+        if (beginning.string.startsWith('***')) return {
+            category: 'horizontalRule',
+            inc: 1
+        }
+    }
+
+
+
     switch (beginning.init) {
         case '#':
             break;
