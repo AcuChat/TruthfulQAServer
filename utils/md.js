@@ -10,6 +10,7 @@ const letterRegex = /^\s*[a-zA-Z]/;
 const beginningRegex = /\S+/;
 const startsWithLetterOrBackslashRegex = /^[a-zA-Z\\]/;
 const orderedListRegex = /^[0-9]+[.)]/;
+const markdownTextRegex = /^[a-zA-Z\\~^=]/
 
 function isMarkdownLink(str) {
     return markdownLinkRegex.test(str);
@@ -73,22 +74,44 @@ function parseBeginning(input) {
       })
     return {
       startingWhitespace,
-      string
+      string,
+      init: string.length ? string[0] : '',
+      next: string.length > 1 ? string[1] : ''
     };
   }
 
-function handleParagraph (line, beginning) {
+function handleParagraph (lines, index, beginning) {
     /*
             Look for line breaks: https://commonmark.org/help/tutorial/03-paragraphs.html
             Text ends with a backslash or two spaces
         */
+
+    // Also provide raw and plainText in meta
+
+    let count = 0;
+    const textLines = [];
+
+    /**
+     * Concatenate line breaks (if any).
+     */
+    while ((index + count) < lines.length) {
+        textLines.push(lines[index + count]);
+        let test = lines[index + count].endsWith('\\');
+        if (!test) test = lines[index + count].endsWith('  ');
+        ++count;
+        if (!test) break;
+    }
+
     return {
-        category: 'paragraph',
-        inc: 1
+        category: 'paragraph', // paragraph
+        inc: count,
+        meta: {
+            raw: textLines.join('')
+        }
     }
 }
 
-function handleOrderedList(lines, index, beginning) {
+function handleOrderedList (lines, index, beginning) {
 
     return {
         category: 'undefined',
@@ -96,7 +119,34 @@ function handleOrderedList(lines, index, beginning) {
     }
 }
 
+function handleLink (lines, index, beginning) {
+    const depth = Math.floor(beginning.startingWhitespace / 4);
+    const text = lines[index].substring(beginning.startingWhitespace);
+    console.log('link text', text);
+
+    
+    /** 
+     * Three possibilities:
+     *   1) Entire line is a link
+     *   2) Line contains the beginning of a link
+     *   3) Line contains link and other things and therefore is paragraph
+     */
+
+    const isLink = linkRegex.test(text);
+    if (isLink) {
+        return {
+            category: 'Link',
+            inc: 1
+        }
+    }
+    return {
+        category: 'undefined',
+        inc:1
+    }
+}
+
 function getCategory (lines, index) {
+    console.log(`getCategoryines(${[index]})`);
     if (!lines[index]) return {
         category: 'blankLine',
         inc: 1
@@ -105,7 +155,7 @@ function getCategory (lines, index) {
     let test;
     const beginning = parseBeginning(lines[index]);
     
-    if (startsWithLetterOrBackslashRegex.test(beginning.string)) return handleParagraph(lines, index, beginning);
+    if (markdownTextRegex.test(beginning.string)) return handleParagraph(lines, index, beginning);
     if (orderedListRegex.test(beginning.string)) return handleOrderedList(lines, index, beginning);
     
     if (beginning.init === '-') {
@@ -122,6 +172,7 @@ function getCategory (lines, index) {
     }
 
 
+    console.log('switch', beginning.init, beginning);
 
     switch (beginning.init) {
         case '#':
@@ -137,80 +188,28 @@ function getCategory (lines, index) {
             break;
         case '`':
             // inline code
+            // or code block ```
             break;
         case '>':
             // be sure to handle nested block quotes https://commonmark.org/help/tutorial/05-blockquotes.html
             break;
-        case '':
+        case '[':
+            return handleLink(lines, index, beginning)
+            break;
+        case '!':
+            // handle image here
+            break;
+        case '|':
+            // handle table here
             break;
         
     }
-
-    
-
-
 
     return {
         category: 'undefined',
         inc: 1
     }
 
-
-    /** 
-     * First check if the line is simply narrative text
-     */
-    test = startsWithLetter(line);
-    if (test) return {
-        category: 'text',
-        inc: 1
-    }
-
-    /**
-     * Check for the category of an entire line first
-     */
-
-    // check if entire line is solely comprised of a link
-    test = getLinkDepth(line);
-    if (test) {
-        return {
-            category: 'link',
-            inc: 1,
-            meta: {
-                depth: test
-            }
-        }
-    }
-
-    // check if the entire line is solely a list item comprised solely of a link
-    test = getListItemLinkDepth(line);
-    if (test) {
-        return {
-            category: 'listItemLink',
-            inc: 1,
-            meta: {
-                depth: test
-            }
-        }
-    }
-
-
-    /** 
-     * Check the category of the line type
-     */
-
-    console.log('beginning', beginning);
-
-    if (beginning.string.startsWith('---')) return {
-        category: 'horizontalRule',
-        inc: 1
-    }
-
-    if (beginning.startingWhitespace === 0 && beginning.string === '') return {
-        category: 'blankLine',
-        inc: 1
-    }
-
-    return '';
 }
 
 
@@ -223,8 +222,8 @@ exports.mdToAcuJson = async (md) => {
     fs.writeFileSync('/home/tmp/mdToJson.txt', md, 'UTF-8');
 
     while (index < mdLines.length) {
-        const {category} = getCategory(mdLines, index);
-        if (category === 'undefined') {
+        const category = getCategory(mdLines, index);
+        if (category.category === 'undefined') {
             console.log("CATEGORY ERROR: ", mdLines[index]);
             const beginning = parseBeginning(mdLines[index]);
             console.log('Beginning: ', beginning);
@@ -242,5 +241,7 @@ exports.mdToAcuJson = async (md) => {
 
         index += category.inc;
     }
+
+    console.log('index, mdLines.length', index, mdLines.length);
     
 }
