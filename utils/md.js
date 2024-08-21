@@ -7,6 +7,8 @@ const listItemLinkDepthRegex = /^(\s*)([*+-])\s+(\[)/;
 const linkRegex = /^(\s*)\[([^\]]*(?:\[[^\]]*\][^\]]*)*)\]\(([^)]+)\)$/; // allows for spaces prior to the beginning of the link
 const letterRegex = /^\s*[a-zA-Z]/;
 const beginningRegex = /\S+/;
+const startsWithLetterOrBackslashRegex = /^[a-zA-Z\\]/;
+const orderedListRegex = /^[0-9]+[.)]/;
 
 function isMarkdownLink(str) {
     return markdownLinkRegex.test(str);
@@ -65,7 +67,8 @@ function parseBeginning(input) {
     console.log({
         startingWhitespace,
         string,
-        init: string.length ? string[0] : ''
+        init: string.length ? string[0] : '',
+        next: string.length > 1 ? string[1] : ''
       })
     return {
       startingWhitespace,
@@ -73,16 +76,61 @@ function parseBeginning(input) {
     };
   }
 
-function getCategory (line) {
-    if (!line) return {
+function handleText (line, beginning) {
+    /*
+            Look for line breaks: https://commonmark.org/help/tutorial/03-paragraphs.html
+            Text ends with a backslash or two spaces
+        */
+    return {
+        category: 'text',
+        inc: 1
+    }
+}
+
+function getCategory (lines, index) {
+    if (!lines[index]) return {
         category: 'blankLine',
         inc: 1
     }
 
-    const beginning = parseBeginning(line);
-
-
     let test;
+    const beginning = parseBeginning(lines[index]);
+    
+    if (startsWithLetterOrBackslashRegex.test(beginning.string)) return handleText(lines, index, beginning);
+    if (orderedListRegex.test(beginning.string)) return handleOrderedList(lines, index, beginning);
+    
+    switch (beginning.init) {
+        case '#':
+            break;
+        case '-':
+        case '+':
+            // undordered list
+        case '*':
+            // can be unordered list, bold, or italic
+            // if beginning.next === ' ' then unordered list
+        case '_':
+            // can be bold or italic
+            break;
+        case '`':
+            // inline code
+            break;
+        case '>':
+            // be sure to handle nested block quotes https://commonmark.org/help/tutorial/05-blockquotes.html
+            break;
+        case '':
+            break;
+        
+    }
+
+    
+
+
+
+    return {
+        category: 'undefined',
+        inc: 1
+    }
+
 
     /** 
      * First check if the line is simply narrative text
@@ -151,8 +199,8 @@ exports.mdToAcuJson = async (md) => {
     fs.writeFileSync('/home/tmp/mdToJson.txt', md, 'UTF-8');
 
     while (index < mdLines.length) {
-        const category = getCategory(mdLines[index]);
-        if (!category) {
+        const {category} = getCategory(mdLines, index);
+        if (category === 'undefined') {
             console.log("CATEGORY ERROR: ", mdLines[index]);
             const beginning = parseBeginning(mdLines[index]);
             console.log('Beginning: ', beginning);
