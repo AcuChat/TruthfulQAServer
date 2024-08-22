@@ -10,9 +10,12 @@ const letterRegex = /^\s*[a-zA-Z]/;
 const beginningRegex = /\S+/;
 const startsWithLetterOrBackslashRegex = /^[a-zA-Z\\]/;
 const orderedListRegex = /^[0-9]+[.)]/;
-const markdownTextRegex = /^[a-zA-Z\\~^=]/;
+const markdownTextRegex = /^[a-zA-Z0-9\\~^.]/;
 const unorderdListTextRegex = /^\s*[*+-]\s+(.*)$/;
 const stringStartsWithLinkRegex = /^\[(?:[^\[\]]|\[(?:[^\[\]]|\[(?:[^\[\]]|\[[^\[\]]*\])*\])*\])*\]\([^\s()]+(?:\s+(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\)))?\)/;
+const previousLineIsHeadingRegex = /^\s*={2,}$/;
+const previousLineIsSubheadingRegex = /^\s*-{2,}$/;
+const entireLineIsImageRegex = /^!\[([^\]]*)\]\(([^\s\)]+)(?:\s+"([^"]*)")?\)$/;
 
 function isMarkdownLink(str) {
     return markdownLinkRegex.test(str);
@@ -147,6 +150,34 @@ function handleLink (lines, index, beginning) {
     }
 }
 
+function handleImage (lines, index, beginning) {
+    const depth = Math.floor(beginning.startingWhitespace / 4);
+    const text = lines[index].substring(beginning.startingWhitespace);
+
+    console.log('image text', text);
+
+    
+    /** 
+     * Three possibilities:
+     *   1) Entire line is an image
+     *   2) Line contains the beginning of an image
+     *   3) Line contains image and other things and therefore is paragraph
+     */
+
+    const isImage = entireLineIsImageRegex.test(text);
+    if (isImage) {
+        return {
+            category: 'Image',
+            raw: lines[index],
+            inc: 1
+        }
+    }
+    return {
+        category: 'undefined',
+        inc:1
+    }
+}
+
 function handleUnorderedList (lines, index, beginning) {
     const depth = Math.floor(beginning.startingWhitespace / 4);
     let match = lines[index].match(unorderdListTextRegex);
@@ -230,21 +261,46 @@ function getCategory (lines, index) {
     console.log(`getCategoryines(${[index]})`);
     if (!lines[index]) return {
         category: 'blankLine',
+        depth: 0,
         inc: 1
     }
 
     let test;
     const beginning = parseBeginning(lines[index]);
-    
-    if (markdownTextRegex.test(beginning.string)) return handleParagraph(lines, index, beginning);
-    if (orderedListRegex.test(beginning.string)) return handleOrderedList(lines, index, beginning);
-    
-    if (beginning.init === '-') {
-        if (beginning.string.startsWith('---')) return {
-            category: 'horizontalRule',
+
+    if (!beginning.string) {
+        return {
+            category: 'whitespace',
+            raw: lines[index],
+            depth: 0,
             inc: 1
         }
     }
+
+    if (orderedListRegex.test(beginning.string)) return handleOrderedList(lines, index, beginning);
+    // IMPORTANT: Test for ordered list must come before handleParagraph so numbers are checked
+    if (markdownTextRegex.test(beginning.string)) return handleParagraph(lines, index, beginning);
+    
+    if (beginning.init === '-') {
+       if (previousLineIsSubheadingRegex.test(lines[index])) {
+         return {
+            category: 'previousLineIsSubheading',
+            inc: 1,
+            raw: lines[index]
+         }
+       }
+    }
+
+    if (beginning.init === '=') {
+        if (previousLineIsHeadingRegex.test(lines[index])) {
+          return {
+             category: 'previousLineIsHeading',
+             inc: 1,
+             raw: lines[index]
+          }
+        }
+     }
+ 
     if (beginning.init === '*') {
         if (beginning.string.startsWith('***')) return {
             category: 'horizontalRule',
@@ -278,9 +334,10 @@ function getCategory (lines, index) {
             // be sure to handle nested block quotes https://commonmark.org/help/tutorial/05-blockquotes.html
             break;
         case '[':
-            return handleLink(lines, index, beginning)
+            return handleLink(lines, index, beginning);
             break;
         case '!':
+            return handleImage(lines, index, beginning);
             // handle image here
             break;
         case '|':
@@ -302,6 +359,12 @@ exports.mdToAcuJson = async (md) => {
     const json = [];
     let index = 0;
     const mdLines = md.split("\n");
+    const jsonLines = [];
+
+    /**
+     * TODO
+     * IMPORTANT: Detect alternate heading lines that affect PREVIOUS category
+     */
 
     fs.writeFileSync('/home/tmp/mdToJson.txt', md, 'UTF-8');
 
