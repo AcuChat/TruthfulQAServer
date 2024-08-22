@@ -16,6 +16,7 @@ const stringStartsWithLinkRegex = /^\[(?:[^\[\]]|\[(?:[^\[\]]|\[(?:[^\[\]]|\[[^\
 const previousLineIsHeadingRegex = /^\s*={2,}$/;
 const previousLineIsSubheadingRegex = /^\s*-{2,}$/;
 const entireLineIsImageRegex = /^!\[([^\]]*)\]\(([^\s\)]+)(?:\s+"([^"]*)")?\)$/;
+const headingTextRegex = /^\s*#+\s+(.+)$/;
 
 function isMarkdownLink(str) {
     return markdownLinkRegex.test(str);
@@ -257,6 +258,46 @@ function handleUnorderedList (lines, index, beginning) {
     }
 }
 
+function handleHeading (lines, index, beginning) {
+    console.log()
+    let level;
+    switch (beginning.string) {
+        case '#':
+            level = 0;
+            break;
+        case '##':
+            level = 1;
+            break;
+        case '###':
+            level = 2;
+            break;
+        case '####':
+            level = 3;
+            break;
+        case '#####':
+            level = 4;
+            break;
+        case '######':
+            level = 5;
+            break;
+        default: 
+            return {
+                category: 'paragraph',
+                inc: 1,
+                raw: lines[index]
+            }
+    }
+    const match = lines[index].match(headingTextRegex);
+    const headingText = match ? match[1] : '';
+
+    return {
+        category: 'heading',
+        depth: level,
+        raw: headingText,
+        inc: 1
+    }
+}
+
 function getCategory (lines, index) {
     console.log(`getCategoryines(${[index]})`);
     if (!lines[index]) return {
@@ -312,7 +353,7 @@ function getCategory (lines, index) {
 
     switch (beginning.init) {
         case '#':
-            break;
+            return handleHeading(lines, index, beginning);
         case '-':
         case '+':
             // undordered list
@@ -370,6 +411,11 @@ exports.mdToAcuJson = async (md) => {
 
     while (index < mdLines.length) {
         const category = getCategory(mdLines, index);
+        category.start = index;
+        category.end = index + category.inc - 1;
+
+        console.log('category', category);
+
         if (category.category === 'undefined') {
             console.log("CATEGORY ERROR: ", mdLines[index]);
             const beginning = parseBeginning(mdLines[index]);
