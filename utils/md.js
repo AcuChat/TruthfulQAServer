@@ -5,8 +5,8 @@ const markdownLinkRegex = /^\[([^\]]+)\]\(([^)]+)\)$/; // presumes the link star
 const listItemLinkRegex = /^\s*[\*\+\-]\s+\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)\s*$/;
 const listItemLinkDepthRegex = /^(\s*)([*+-])\s+(\[)/;
 // Regular expression to match a markdown link
-const linkRegex = /^(\s*)\[([^\]]*(?:\[[^\]]*\][^\]]*)*)\]\(([^)]+)\)$/; // allows for spaces prior to the beginning of the link
-
+//const linkRegex = /^(\s*)\[([^\]]*(?:\[[^\]]*\][^\]]*)*)\]\(([^)]+)\)$/; // allows for spaces prior to the beginning of the link
+const linkRegex = /^(\s*)(!?\[(?:[^\[\]]|\[[^\[\]]*\])*\])(\((?:[^()]|\([^()]*\))*\))(\s*)$/;
 const letterRegex = /^\s*[a-zA-Z]/;
 const beginningRegex = /\S+/;
 const startsWithLetterOrBackslashRegex = /^[a-zA-Z\\]/;
@@ -263,6 +263,7 @@ function handleUnorderedList (lines, index, beginning) {
         console.log(`unordered text: =${text}=`);
     let test = markdownTextRegex.test(text);
     if (text[0] === '_') test = true;
+    if (text[0] === '*') test = true;
 
     if (test) {
         return {
