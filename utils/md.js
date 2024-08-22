@@ -11,7 +11,7 @@ const letterRegex = /^\s*[a-zA-Z]/;
 const beginningRegex = /\S+/;
 const startsWithLetterOrBackslashRegex = /^[a-zA-Z\\]/;
 const orderedListRegex = /^[0-9]+[.)]/;
-const markdownTextRegex = /^[a-zA-Z0-9\\~^.]/;
+const markdownTextRegex = /^[a-zA-Z0-9\\~^."']/;
 const unorderdListTextRegex = /^\s*[*+-]\s+(.*)$/;
 const stringStartsWithLinkRegex = /^\[(?:[^\[\]]|\[(?:[^\[\]]|\[(?:[^\[\]]|\[[^\[\]]*\])*\])*\])*\]\([^\s()]+(?:\s+(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\)))?\)/;
 const previousLineIsHeadingRegex = /^\s*={2,}$/;
@@ -262,6 +262,8 @@ function handleUnorderedList (lines, index, beginning) {
     // The unordered list does not start with a link
         console.log(`unordered text: =${text}=`);
     let test = markdownTextRegex.test(text);
+    if (text[0] === '_') test = true;
+
     if (test) {
         return {
             category: 'listItem',
