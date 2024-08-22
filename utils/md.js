@@ -180,6 +180,7 @@ function handleImage (lines, index, beginning) {
 }
 
 function handleUnorderedList (lines, index, beginning) {
+    console.log('\n\nhandleUnorderedList');
     const depth = Math.floor(beginning.startingWhitespace / 4);
     let match = lines[index].match(unorderdListTextRegex);
     let text = match ? match[1] : '';
@@ -247,7 +248,15 @@ function handleUnorderedList (lines, index, beginning) {
 
     // The unordered list does not start with a link
         console.log(`unordered text: =${text}=`);
-
+    let test = markdownTextRegex.test(text);
+    if (test) {
+        return {
+            category: 'listItem',
+            inc: 1,
+            depth,
+            raw: text
+        }
+    }
         // we need to check for line breaks
 
 
