@@ -6,6 +6,7 @@ const listItemLinkRegex = /^\s*[\*\+\-]\s+\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]*)"
 const listItemLinkDepthRegex = /^(\s*)([*+-])\s+(\[)/;
 // Regular expression to match a markdown link
 const linkRegex = /^(\s*)\[([^\]]*(?:\[[^\]]*\][^\]]*)*)\]\(([^)]+)\)$/; // allows for spaces prior to the beginning of the link
+
 const letterRegex = /^\s*[a-zA-Z]/;
 const beginningRegex = /\S+/;
 const startsWithLetterOrBackslashRegex = /^[a-zA-Z\\]/;
@@ -124,6 +125,7 @@ function handleOrderedList (lines, index, beginning) {
 }
 
 function handleLink (lines, index, beginning) {
+    console.log('\n\nhandleLink')
     const depth = Math.floor(beginning.startingWhitespace / 4);
     const text = lines[index].substring(beginning.startingWhitespace);
 
@@ -145,6 +147,17 @@ function handleLink (lines, index, beginning) {
             inc: 1
         }
     }
+
+    let test = stringStartsWithLinkRegex.test(text);
+    if (test) {
+        return {
+            category: 'paragraph',
+            raw: text,
+            depth,
+            inc: 1
+        }
+    }
+
     return {
         category: 'undefined',
         inc:1
