@@ -257,11 +257,33 @@ function handleList (lines, index, beginning, type) {
         }
     }
 
-
-
     // The list does not start with a link
         console.log(`list text: =${text}=`);
-    let test = markdownTextRegex.test(text);
+
+    // Are we dealing with an image?
+    if (text.length > 2 && text[0] === '!' && text[1] === '[') {
+        let test = entireLineIsImageRegex.test(text);
+        if (test) {
+            return {
+                category: 'listImage',
+                depth,
+                type,
+                raw: text,
+                inc: 1
+            }
+        }
+        
+        return {
+            category: 'listText',
+            type,
+            inc: 1,
+            depth,
+            raw: text
+        } 
+    }
+
+
+        let test = markdownTextRegex.test(text);
     if (text[0] === '_') test = true;
     if (text[0] === '*') test = true;
 
