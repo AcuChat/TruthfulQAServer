@@ -67,4 +67,4 @@ const mdToJson = async () => {
     md.mdToAcuJson(r[0].content);
 }
 
-//test();
+processContent();

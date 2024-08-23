@@ -2,6 +2,24 @@ const { JSDOM } = require("jsdom");
 const { Readability } = require("@mozilla/readability");
 const TurndownService = require('turndown');
 
+
+// Function to remove CSS content from HTML string
+exports.removeCSSContent = (html) => {
+    // Remove CSS content
+    html = html.replace(/\.[\w-]+\s*{[^}]*}/g, '');
+    
+    // Remove @media rules
+    html = html.replace(/@media[^{]+{[^}]+}/g, '');
+    
+    // Remove any remaining lone curly braces
+    html = html.replace(/[{}]/g, '');
+    
+    // Trim whitespace
+    html = html.trim();
+    
+    return html;
+}
+
 exports.htmlToMarkdownViaTurndown = (html, stripCss = false) => {
     const dom = new JSDOM(html);
     const bodyInnerHTML = dom.window.document.body.innerHTML;
@@ -13,22 +31,21 @@ exports.htmlToMarkdownViaTurndown = (html, stripCss = false) => {
         return markdown;
     }
 
-    const turndownService = new TurndownService({
-        headingStyle: 'atx',
-        codeBlockStyle: 'fenced',
-        emDelimiter: '_'
-      });
-      
-      // Add a rule to remove all class attributes
-      turndownService.addRule('removeClasses', {
-        filter: function (node) {
-          return node.nodeType === Node.ELEMENT_NODE;
-        },
-        replacement: function (content, node, options) {
-          node.removeAttribute('class');
-          return content;
-        }
-      });
+    const TurndownService = require('turndown');
+
+const turndownService = new TurndownService({
+  headingStyle: 'atx',
+  codeBlockStyle: 'fenced',
+  emDelimiter: '_'
+});
+
+    
+    // Wrap the original turndown method
+    const originalTurndown = turndownService.turndown;
+    turndownService.turndown = function(html) {
+    const htmlWithoutCSS = removeCSSContent(html);
+    return originalTurndown.call(this, htmlWithoutCSS);
+    };
       
       // Use the modified turndownService to convert HTML to Markdown
       const markdown = turndownService.turndown(html);
