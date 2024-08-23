@@ -6,7 +6,9 @@ const listItemLinkRegex = /^\s*[\*\+\-]\s+\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]*)"
 const listItemLinkDepthRegex = /^(\s*)([*+-])\s+(\[)/;
 // Regular expression to match a markdown link
 //const linkRegex = /^(\s*)\[([^\]]*(?:\[[^\]]*\][^\]]*)*)\]\(([^)]+)\)$/; // allows for spaces prior to the beginning of the link
-const linkRegex = /^(\s*)(!?\[(?:[^\[\]]|\[[^\[\]]*\])*\])(\((?:[^()]|\([^()]*\))*\))(\s*)$/;
+//const linkRegex = /^(\s*)(!?\[(?:[^\[\]]|\[[^\[\]]*\])*\])(\((?:[^()]|\([^()]*\))*\))(\s*)$/;
+const linkRegex = /^(\s*)(!?\[(?:[^\[\]]|\[[^\[\]]*\])*\])(\((?:[^()]|\([^()]*(?:\([^()]*\)[^()]*)*\))*\))(\s*)$/;
+
 const letterRegex = /^\s*[a-zA-Z]/;
 const beginningRegex = /\S+/;
 const startsWithLetterOrBackslashRegex = /^[a-zA-Z\\]/;
@@ -384,10 +386,10 @@ function getCategory (lines, index) {
             // undordered list
             return handleUnorderedList(lines, index, beginning);
         case '*':
-            // if bold or italic then is category paragraph
+            // if entire line starts with * followed by space then unordered list
             if (beginning.string === '*') return handleUnorderedList(lines, index, beginning);
-            handleParagraph(lines, index, beginning);
-            
+            // otherwise it is bold or italic meaning paragraph
+            return handleParagraph(lines, index, beginning);            
         case '_':
             // can be bold or italic
             return handleParagraph(lines, index, beginning)
@@ -401,11 +403,8 @@ function getCategory (lines, index) {
             break;
         case '[':
             return handleLink(lines, index, beginning);
-            break;
         case '!':
             return handleImage(lines, index, beginning);
-            // handle image here
-            break;
         case '|':
             // handle table here
             break;

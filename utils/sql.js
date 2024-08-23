@@ -95,4 +95,10 @@ exports.nextUnprocessedWiki = async () => {
 
 }
 
+exports.resetContent = async () => {
+    const q = `UPDATE sources SET content = NULL`;
+    const r = await this.query(q);
+    return r;
+}
+
 createTables();

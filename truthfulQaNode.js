@@ -43,7 +43,7 @@ const storeWikiHtml = async () => {
 
 
 
-const main = async () => {
+const processContent = async () => {
     while (true) {
         const wiki = await sql.nextUnprocessedWiki();
         if (!wiki.length) return;
@@ -60,11 +60,11 @@ const main = async () => {
     
 }
 
-const test = async () => {
+const mdToJson = async () => {
     const q = `SELECT content FROM sources LIMIT 1`;
     const r = await sql.query(q);
 
     md.mdToAcuJson(r[0].content);
 }
 
-test();
+//test();
