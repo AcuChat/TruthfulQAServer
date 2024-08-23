@@ -191,7 +191,9 @@ function handleImage (lines, index, beginning) {
 
 function handleList (lines, index, beginning, type) {
     const depth = Math.floor(beginning.startingWhitespace / 4);
-    let match = lines[index].match(unorderdListTextRegex);
+    let match = type === 'unordered' ? 
+        lines[index].match(unorderdListTextRegex) :
+        lines[index].match(orderedListTextRegex);
     let text = match ? match[1] : '';
 
     // Are we dealing with a link?
