@@ -2,14 +2,37 @@ const { JSDOM } = require("jsdom");
 const { Readability } = require("@mozilla/readability");
 const TurndownService = require('turndown');
 
-exports.htmlToMarkdownViaTurndown = (html) => {
+exports.htmlToMarkdownViaTurndown = (html, stripCss = false) => {
     const dom = new JSDOM(html);
     const bodyInnerHTML = dom.window.document.body.innerHTML;
     
-    const turndownService = new TurndownService();
-    const markdown = turndownService.turndown(bodyInnerHTML);
-    
-    return markdown;
+    if (!stripCss) {
+        const turndownService = new TurndownService();
+        const markdown = turndownService.turndown(bodyInnerHTML);
+        
+        return markdown;
+    }
+
+    const turndownService = new TurndownService({
+        headingStyle: 'atx',
+        codeBlockStyle: 'fenced',
+        emDelimiter: '_'
+      });
+      
+      // Add a rule to remove all class attributes
+      turndownService.addRule('removeClasses', {
+        filter: function (node) {
+          return node.nodeType === Node.ELEMENT_NODE;
+        },
+        replacement: function (content, node, options) {
+          node.removeAttribute('class');
+          return content;
+        }
+      });
+      
+      // Use the modified turndownService to convert HTML to Markdown
+      const markdown = turndownService.turndown(html);
+      return markdown;
 }
 
 exports.htmlToTextViaJsdom = async (html) => {

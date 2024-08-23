@@ -49,7 +49,7 @@ const processContent = async () => {
         if (!wiki.length) return;
         // const article = await html.htmlToTextViaReadability(wiki[0].raw_content);
         // const fullArticle = article.title && article.textBody ? article.title + "\n\n" + article.textBody : '';
-        const fullArticle = html.htmlToMarkdownViaTurndown(wiki[0].raw_content);
+        const fullArticle = html.htmlToMarkdownViaTurndown(wiki[0].raw_content, true);
 
         if (fullArticle) {
             const q = `UPDATE sources SET content = ${sql.escape(fullArticle)} WHERE id = ${wiki[0].id}`;
