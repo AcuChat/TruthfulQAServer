@@ -15,6 +15,7 @@ const startsWithLetterOrBackslashRegex = /^[a-zA-Z\\]/;
 const orderedListRegex = /^[0-9]+[.)]/;
 const markdownTextRegex = /^[a-zA-Z0-9\\~^."']/;
 const unorderdListTextRegex = /^\s*[*+-]\s+(.*)$/;
+const orderedListTextRegex = /^\s*\d+\.\s+(.*)$/;
 const stringStartsWithLinkRegex = /^\[(?:[^\[\]]|\[(?:[^\[\]]|\[(?:[^\[\]]|\[[^\[\]]*\])*\])*\])*\]\([^\s()]+(?:\s+(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\)))?\)/;
 const previousLineIsHeadingRegex = /^\s*={2,}$/;
 const previousLineIsSubheadingRegex = /^\s*-{2,}$/;
@@ -118,13 +119,7 @@ function handleParagraph (lines, index, beginning) {
     }
 }
 
-function handleOrderedList (lines, index, beginning) {
 
-    return {
-        category: 'undefined',
-        inc:1
-    }
-}
 
 function handleLink (lines, index, beginning) {
     console.log('\n\nhandleLink')
@@ -194,8 +189,7 @@ function handleImage (lines, index, beginning) {
     }
 }
 
-function handleUnorderedList (lines, index, beginning) {
-    console.log('\n\nhandleUnorderedList');
+function handleList (lines, index, beginning, type) {
     const depth = Math.floor(beginning.startingWhitespace / 4);
     let match = lines[index].match(unorderdListTextRegex);
     let text = match ? match[1] : '';
@@ -208,7 +202,7 @@ function handleUnorderedList (lines, index, beginning) {
             return {
                 category: 'listLink',
                 depth,
-                type: 'unordered',
+                type,
                 raw: text,
                 inc: 1
             }
@@ -218,7 +212,8 @@ function handleUnorderedList (lines, index, beginning) {
         let completeLink = stringStartsWithLinkRegex.test(text);
         if (completeLink) {
             return {
-                category: 'paragraph',
+                category: 'listText',
+                type,
                 depth,
                 raw: text,
                 inc: 1
@@ -238,13 +233,14 @@ function handleUnorderedList (lines, index, beginning) {
                     return {
                         category: 'listLink',
                         depth,
-                        type: 'unordered',
+                        type,
                         raw: text,
                         inc: count
                     }
                 } 
                 return {
-                    category: 'listItem',
+                    category: 'listText',
+                    type,
                     depth,
                     raw: text,
                     inc: count
@@ -261,15 +257,16 @@ function handleUnorderedList (lines, index, beginning) {
 
 
 
-    // The unordered list does not start with a link
-        console.log(`unordered text: =${text}=`);
+    // The list does not start with a link
+        console.log(`list text: =${text}=`);
     let test = markdownTextRegex.test(text);
     if (text[0] === '_') test = true;
     if (text[0] === '*') test = true;
 
     if (test) {
         return {
-            category: 'listItem',
+            category: 'listText',
+            type,
             inc: 1,
             depth,
             raw: text
@@ -283,6 +280,16 @@ function handleUnorderedList (lines, index, beginning) {
         depth,
         inc: 1
     }
+}
+
+function handleUnorderedList (lines, index, beginning) {
+    console.log('\n\nhandleUnorderedList')
+    return handleList(lines, index, beginning, 'unordered');
+}
+
+function handleOrderedList (lines, index, beginning) {
+    console.log('\n\nhandleOrderedList')
+    return handleList(lines, index, beginning, 'ordered');
 }
 
 function handleHeading (lines, index, beginning) {

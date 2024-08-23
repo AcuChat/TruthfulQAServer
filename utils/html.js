@@ -62,7 +62,7 @@ exports.htmlToMarkdownViaTurndown = (html, stripCss = false) => {
     // Wrap the original turndown method
     const originalTurndown = turndownService.turndown;
     turndownService.turndown = function(html) {
-        const htmlWithoutCSS = exports.removeFullCSSContent(html);
+        const htmlWithoutCSS = exports.removeCSSContent(html);
         return originalTurndown.call(this, htmlWithoutCSS);
     };
       
