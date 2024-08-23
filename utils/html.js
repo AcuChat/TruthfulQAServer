@@ -33,23 +33,23 @@ exports.htmlToMarkdownViaTurndown = (html, stripCss = false) => {
 
     const TurndownService = require('turndown');
 
-const turndownService = new TurndownService({
-  headingStyle: 'atx',
-  codeBlockStyle: 'fenced',
-  emDelimiter: '_'
-});
+    const turndownService = new TurndownService({
+        headingStyle: 'atx',
+        codeBlockStyle: 'fenced',
+        emDelimiter: '_'
+    });
 
     
     // Wrap the original turndown method
     const originalTurndown = turndownService.turndown;
     turndownService.turndown = function(html) {
-    const htmlWithoutCSS = removeCSSContent(html);
-    return originalTurndown.call(this, htmlWithoutCSS);
+        const htmlWithoutCSS = exports.removeCSSContent(html);
+        return originalTurndown.call(this, htmlWithoutCSS);
     };
       
-      // Use the modified turndownService to convert HTML to Markdown
-      const markdown = turndownService.turndown(html);
-      return markdown;
+    // Use the modified turndownService to convert HTML to Markdown
+    const markdown = turndownService.turndown(html);
+    return markdown;
 }
 
 exports.htmlToTextViaJsdom = async (html) => {

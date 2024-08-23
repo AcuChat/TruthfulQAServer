@@ -67,4 +67,5 @@ const mdToJson = async () => {
     md.mdToAcuJson(r[0].content);
 }
 
+//sql.resetContent();
 processContent();
