@@ -68,4 +68,5 @@ const mdToJson = async () => {
 }
 
 //sql.resetContent();
-processContent();
+//processContent();
+mdToJson();

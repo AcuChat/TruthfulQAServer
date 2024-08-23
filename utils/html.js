@@ -20,6 +20,25 @@ exports.removeCSSContent = (html) => {
     return html;
 }
 
+exports.removeFullCSSContent = (html) => {
+    // Remove all content between curly braces (CSS rules)
+    html = html.replace(/\{[^}]+\}/g, '');
+    
+    // Remove class names
+    html = html.replace(/\.\w+(-\w+)*/g, '');
+    
+    // Remove @media queries
+    html = html.replace(/@media[^{]+\{[^}]+\}/g, '');
+    
+    // Remove any remaining CSS-like constructs
+    html = html.replace(/[a-z-]+:[^;]+;/g, '');
+    
+    // Remove extra spaces and line breaks
+    html = html.replace(/\s+/g, ' ').trim();
+    
+    return html;
+  }
+
 exports.htmlToMarkdownViaTurndown = (html, stripCss = false) => {
     const dom = new JSDOM(html);
     const bodyInnerHTML = dom.window.document.body.innerHTML;
@@ -43,7 +62,7 @@ exports.htmlToMarkdownViaTurndown = (html, stripCss = false) => {
     // Wrap the original turndown method
     const originalTurndown = turndownService.turndown;
     turndownService.turndown = function(html) {
-        const htmlWithoutCSS = exports.removeCSSContent(html);
+        const htmlWithoutCSS = exports.removeFullCSSContent(html);
         return originalTurndown.call(this, htmlWithoutCSS);
     };
       
