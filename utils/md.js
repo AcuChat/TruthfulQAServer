@@ -92,15 +92,7 @@ function parseBeginning(input) {
     };
   }
 
-function handleParagraph (lines, index, beginning) {
-    console.log('\n\nhandleParagraph');
-    /*
-            Look for line breaks: https://commonmark.org/help/tutorial/03-paragraphs.html
-            Text ends with a backslash or two spaces
-        */
-
-    // Also provide raw and plainText in meta
-
+function getTextLines (lines, index) {
     let count = 0;
     const textLines = [];
 
@@ -115,6 +107,20 @@ function handleParagraph (lines, index, beginning) {
         if (!test) break;
     }
 
+    return { count, textLines };
+}
+
+function handleParagraph (lines, index, beginning) {
+    console.log('\n\nhandleParagraph');
+    /*
+            Look for line breaks: https://commonmark.org/help/tutorial/03-paragraphs.html
+            Text ends with a backslash or two spaces
+        */
+
+    // Also provide raw and plainText in meta
+
+    const { count, textLines } = getTextLines(lines, index);
+    
     return {
         category: 'paragraph', // paragraph
         inc: count,
@@ -415,6 +421,8 @@ function handleBlockquoteOrderedList (lines, index, beginning, contentBeginning)
 }
 
 function handleBlockquoteParagraph (lines, index, beginning, contentBeginning) {
+    console.log('\n\nhandleBlockquoteParagraph');
+
     return {
         category: 'undefined',
         type: 'blockquoteParagraph',
