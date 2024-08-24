@@ -21,6 +21,8 @@ const previousLineIsHeadingRegex = /^\s*={2,}$/;
 const previousLineIsSubheadingRegex = /^\s*-{2,}$/;
 const entireLineIsImageRegex = /^!\[([^\]]*)\]\(([^\s\)]+)(?:\s+"([^"]*)")?\)$/;
 const headingTextRegex = /^\s*#+\s+(.+)$/;
+const blockquoteRegex = /^((?:>\s*)+)(.*)$/;
+
 
 function isMarkdownLink(str) {
     return markdownLinkRegex.test(str);
@@ -362,9 +364,36 @@ function handleHeading (lines, index, beginning) {
     }
 }
 
+
+function parseBlockQuote(line) {
+    const regex = blockquoteRegex;
+    const match = line.match(regex);
+
+    if (match) {
+        const quoteMarkers = match[1].replace(/[^>]/g, '');
+        const quoteDepth = quoteMarkers.length;
+        const content = match[2].trim();
+        return { depth: quoteDepth, content: content };
+    } else {
+        return { depth: 0, content: line.trim() };
+    }
+}
 function handleBlockquote (lines, index, beginning) {
     console.log('\n\nhandleBlockquote');
-    
+    const { depth, content} = parseBlockQuote(lines[index]);
+    console.log('depth', depth);
+    console.log('content', content);
+
+    if (!content) {
+        return {
+            category: 'blockquoteBlankLine',
+            inc: 1,
+            raw: ''
+        }
+    }
+
+    const contentBeginning = parseBeginning(content);
+    console.log('contentBeginning', contentBeginning);
 
     return {
         category: 'undefined',
@@ -377,6 +406,7 @@ function getCategory (lines, index) {
     console.log(`getCategoryines(${[index]})`);
     if (!lines[index]) return {
         category: 'blankLine',
+        raw: '',
         depth: 0,
         inc: 1
     }
