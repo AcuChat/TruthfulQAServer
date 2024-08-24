@@ -422,11 +422,11 @@ function handleBlockquoteOrderedList (lines, index, beginning, contentBeginning)
 
 function handleBlockquoteParagraph (lines, index, beginning, contentBeginning) {
     console.log('\n\nhandleBlockquoteParagraph');
-
+    const { count, textLines } = getTextLines(lines, index);
     return {
-        category: 'undefined',
-        type: 'blockquoteParagraph',
-        inc: 1
+        category: 'blockquoteParagraph',
+        raw: textLines.join(''),
+        inc: count
     }
 }
 
