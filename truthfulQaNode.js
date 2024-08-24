@@ -2,7 +2,7 @@ require('dotenv').config();
 const sql = require('./utils/sql');
 const html = require('./utils/html');
 const axios = require('axios');
-const md = require('./utils/md');
+const mdUtil = require('./utils/md');
 
 function extractWikipediaUrl(text) {
     // Define the regex pattern for Wikipedia URLs
@@ -76,16 +76,18 @@ const processContent = async () => {
 }
 
 const mdToJson = async (num) => {
-    const q = `SELECT content FROM sources LIMIT ${num}`;
-    const r = await sql.query(q);
-
     for (let i = 0; i < num; ++i) {
-        const result = md.mdToAcuJson(r[i].content);
+        const q = `SELECT url, md FROM content WHERE status = 'md' LIMIT ${num}`;
+        const r = await sql.query(q);
+        if (!r.length) break;
+        const { url, md } = r[0];
+        console.log(url);
+        const result = mdUtil.mdToAcuJson(md);
         if (result === false) break;
     }
 }
 
 //storeWikiHtml();
 //sql.resetContent();
-processContent();
-//mdToJson(5);
+//processContent();
+mdToJson(5);

@@ -362,6 +362,17 @@ function handleHeading (lines, index, beginning) {
     }
 }
 
+function handleBlockquote (lines, index, beginning) {
+    console.log('\n\nhandleBlockquote');
+    
+
+    return {
+        category: 'undefined',
+        type: 'blockquote',
+        inc: 1
+    }
+}
+
 function getCategory (lines, index) {
     console.log(`getCategoryines(${[index]})`);
     if (!lines[index]) return {
@@ -438,6 +449,7 @@ function getCategory (lines, index) {
             break;
         case '>':
             // be sure to handle nested block quotes https://commonmark.org/help/tutorial/05-blockquotes.html
+            return handleBlockquote(lines, index, beginning);
             break;
         case '[':
             return handleLink(lines, index, beginning);
