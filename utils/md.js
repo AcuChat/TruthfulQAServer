@@ -13,7 +13,7 @@ const letterRegex = /^\s*[a-zA-Z]/;
 const beginningRegex = /\S+/;
 const startsWithLetterOrBackslashRegex = /^[a-zA-Z\\]/;
 const orderedListRegex = /^[0-9]+[.)]/;
-const markdownTextRegex = /^[a-zA-Z0-9\\~^."']/;
+const markdownTextRegex = /^[a-zA-Z0-9\\~^."'—]/;
 const unorderdListTextRegex = /^\s*[*+-]\s+(.*)$/;
 const orderedListTextRegex = /^\s*\d+\.\s+(.*)$/;
 const stringStartsWithLinkRegex = /^\[(?:[^\[\]]|\[(?:[^\[\]]|\[(?:[^\[\]]|\[[^\[\]]*\])*\])*\])*\]\([^\s()]+(?:\s+(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\)))?\)/;
@@ -402,8 +402,45 @@ function handleBlockquote (lines, index, beginning) {
     console.log('contentBeginning', contentBeginning);
 
     if (orderedListRegex.test(contentBeginning.string)) return handleBlockquoteOrderedList(lines, index, beginning, contentBeginning);
-
     if (markdownTextRegex.test(contentBeginning.string)) return handleBlockquoteParagraph(lines, index, beginning, contentBeginning);
+
+    if (contentBeginning.init === '-') {
+        if (previousLineIsSubheadingRegex.test(lines[index])) {
+          return {
+             category: 'blockquotePreviousLineIsSubheading',
+             inc: 1,
+             raw: lines[index]
+          }
+        }
+     }
+ 
+    if (contentBeginning.init === '=') {
+        if (previousLineIsHeadingRegex.test(lines[index])) {
+        return {
+            category: 'blockquotePreviousLineIsHeading',
+            inc: 1,
+            raw: lines[index]
+        }
+        }
+    }
+
+    if (contentBeginning.init === '*') {
+        if (contentBeginning.string.startsWith('***')) return {
+            category: 'blockquoteHorizontalRule',
+            inc: 1
+        }
+    }
+
+    console.log(`switch [${contentBeginning.init}]`, contentBeginning.init, contentBeginning);
+
+    switch (contentBeginning.init) {
+        case '-':
+            console.log("HERE HERE")
+        case '+':
+            // undordered list
+            console.log("HERE")
+            return handleBlockquoteUnorderedList(lines, index, beginning, contentBeginning);
+    }
     return {
         category: 'undefined',
         type: 'blockquote',
@@ -412,10 +449,19 @@ function handleBlockquote (lines, index, beginning) {
 }
 
 function handleBlockquoteOrderedList (lines, index, beginning, contentBeginning) {
-
+    console.log('\n\nhandleBlockquoteOrderedList');
     return {
         category: 'undefined',
         type: 'blockquoteOrderedList',
+        inc: 1
+    }
+}
+
+function handleBlockquoteUnorderedList (lines, index, beginning, contentBeginning) {
+    console.log('\n\nhandleBlockquoteUnorderedList')
+    return {
+        category: 'undefined',
+        type: 'blockquoteUnorderedList',
         inc: 1
     }
 }
