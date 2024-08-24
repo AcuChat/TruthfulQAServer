@@ -123,4 +123,10 @@ exports.addUrlRaw = async (url, raw) => {
     return r;
 }
 
+exports.addIdUrl = async (id, url) => {
+    const q = `INSERT INTO sources (id, url) VALUES (${id}, ${exports.escape(url)}) ON DUPLICATE KEY UPDATE url = VALUES(url)`;
+    const r = await exports.query(q);
+    return r;
+}
+
 createTables();
