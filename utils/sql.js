@@ -53,6 +53,17 @@ const createTables = async () => {
 
     let r = await this.query(q);
 
+    q = `CREATE TABLE IF NOT EXISTS content (
+        url VARCHAR(2048) CHARACTER SET ascii NOT NULL PRIMARY KEY,
+        raw MEDIUMTEXT,
+        md MEDIUMTEXT,
+        json MEDIUMTEXT,
+        status VARCHAR(64) DEFAULT 'init',
+        INDEX(status)
+    )`;
+
+    r = await this.query(q);
+
     q = `CREATE TABLE IF NOT EXISTS sources (
         id BIGINT NOT NULL PRIMARY KEY,
         raw_content MEDIUMTEXT,

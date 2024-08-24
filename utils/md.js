@@ -91,6 +91,7 @@ function parseBeginning(input) {
   }
 
 function handleParagraph (lines, index, beginning) {
+    console.log('\n\nhandleParagraph');
     /*
             Look for line breaks: https://commonmark.org/help/tutorial/03-paragraphs.html
             Text ends with a backslash or two spaces
@@ -133,10 +134,11 @@ function handleLink (lines, index, beginning) {
      * Three possibilities:
      *   1) Entire line is a link
      *   2) Line contains the beginning of a link
-     *   3) Line contains link and other things and therefore is paragraph
+     *   3) Line contains link and other things and therefore is paragraph  
      */
 
     const isLink = linkRegex.test(text);
+   
     if (isLink) {
         return {
             category: 'Link',
@@ -195,11 +197,14 @@ function handleList (lines, index, beginning, type) {
         lines[index].match(unorderdListTextRegex) :
         lines[index].match(orderedListTextRegex);
     let text = match ? match[1] : '';
+    
+    console.log(`list text: =${text}=`);
 
+    if (text[0] !== '[') console.log("IS NOT LINK");
     // Are we dealing with a link?
     if (text[0] === '[') {
         // if the full line is a link then we are done
-        let test = listItemLinkRegex.test(lines[index]);
+        let test = linkRegex.test(text);
         if (test) {
             return {
                 category: 'listLink',
@@ -208,6 +213,8 @@ function handleList (lines, index, beginning, type) {
                 raw: text,
                 inc: 1
             }
+        } else {
+            console.log("FULL LINE IS NOT LINK");
         }
 
         // If we have a complete link plus other stuff then we are done
@@ -257,8 +264,7 @@ function handleList (lines, index, beginning, type) {
         }
     }
 
-    // The list does not start with a link
-        console.log(`list text: =${text}=`);
+    
 
     // Are we dealing with an image?
     if (text.length > 2 && text[0] === '!' && text[1] === '[') {
@@ -420,7 +426,8 @@ function getCategory (lines, index) {
             // if entire line starts with * followed by space then unordered list
             if (beginning.string === '*') return handleUnorderedList(lines, index, beginning);
             // otherwise it is bold or italic meaning paragraph
-            return handleParagraph(lines, index, beginning);            
+            return handleParagraph(lines, index, beginning);    
+        case '(':        
         case '_':
             // can be bold or italic
             return handleParagraph(lines, index, beginning)
@@ -449,7 +456,11 @@ function getCategory (lines, index) {
 
 }
 
-
+/** 
+ * Returns: 
+ *  false if entire md is not parsable
+ *  array of objects if parsable
+ */
 
 exports.mdToAcuJson = async (md) => {
     const json = [];
@@ -469,6 +480,8 @@ exports.mdToAcuJson = async (md) => {
         category.start = index;
         category.end = index + category.inc - 1;
 
+        jsonLines.push(category);
+
         console.log('category', category);
 
         if (category.category === 'undefined') {
@@ -482,7 +495,7 @@ exports.mdToAcuJson = async (md) => {
             console.log(mdLines[index+4]);
             console.log(mdLines[index+5]);
 
-            return;
+            return false;
         }
         console.log("LINE:", mdLines[index]);
         console.log(category);
@@ -491,5 +504,5 @@ exports.mdToAcuJson = async (md) => {
     }
 
     console.log('index, mdLines.length', index, mdLines.length);
-    
+    return jsonLines;    
 }

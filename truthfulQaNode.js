@@ -60,13 +60,16 @@ const processContent = async () => {
     
 }
 
-const mdToJson = async () => {
-    const q = `SELECT content FROM sources LIMIT 1`;
+const mdToJson = async (num) => {
+    const q = `SELECT content FROM sources LIMIT ${num}`;
     const r = await sql.query(q);
 
-    md.mdToAcuJson(r[0].content);
+    for (let i = 0; i < num; ++i) {
+        const result = md.mdToAcuJson(r[i].content);
+        if (result === false) break;
+    }
 }
 
 //sql.resetContent();
 //processContent();
-mdToJson();
+mdToJson(5);
