@@ -30,7 +30,8 @@ const storeWikiHtml = async () => {
     const wiki = await sql.wikipediaQuestions();
    
     for (let i = 0; i < wiki.length; ++i) {  
-        const { id, question, source } = wiki[i];  
+        const { id, question, source } = wiki[i];
+        console.log(id);
         let url = extractWikipediaUrl(source);
         url = url.replaceAll(';', '');
         const isUrl = isValidUrl(url);
@@ -39,8 +40,7 @@ const storeWikiHtml = async () => {
         // At this point, we have a wikipedia url
 
         url = html.stripAnchorFromUrl(url);
-        console.log(url); break;
-
+        
         // If we already have the url then skip it
         const status = await sql.getUrlStatus(url);
         if (status.length) continue;
@@ -49,12 +49,10 @@ const storeWikiHtml = async () => {
         const { data } = response;
 
         // add raw data to content (url, raw)
+        await sql.addUrlRaw(url, data);
 
         // add id, url to sources table
-
-
-        const q = `INSERT INTO sources (id, raw_content) VALUES (${wiki[i].id}, ${sql.escape(response.data)})`;
-        const r = await sql.query(q);
+        await sql.addIdUrl(id, url);
     }
 }
 
