@@ -111,4 +111,10 @@ exports.resetContent = async () => {
     return r;
 }
 
+exports.getUrlStatus = async (url) => {
+    const q = `SELECT status FROM content WHERE url = ${exports.escape(url)}`;
+    const r = await exports.query(q);
+    return r;
+}
+
 createTables();
