@@ -105,6 +105,13 @@ exports.nextUnprocessedWiki = async () => {
 
 }
 
+exports.nextUnprocessedRaw = async () => {
+    let q = `SELECT url, raw FROM content WHERE status = 'init' LIMIT 1`;
+    let r = await this.query(q);
+    return r;
+
+}
+
 exports.resetContent = async () => {
     const q = `UPDATE sources SET content = NULL`;
     const r = await this.query(q);
