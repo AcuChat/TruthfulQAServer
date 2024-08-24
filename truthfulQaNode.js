@@ -40,6 +40,9 @@ const storeWikiHtml = async () => {
         // At this point, we have a wikipedia url
 
         url = html.stripAnchorFromUrl(url);
+
+        // add id, url to sources table
+        await sql.addIdUrl(id, url);
         
         // If we already have the url then skip it
         const status = await sql.getUrlStatus(url);
@@ -51,8 +54,7 @@ const storeWikiHtml = async () => {
         // add raw data to content (url, raw)
         await sql.addUrlRaw(url, data);
 
-        // add id, url to sources table
-        await sql.addIdUrl(id, url);
+        
     }
 }
 
