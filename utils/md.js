@@ -397,6 +397,7 @@ function handleBlockquote (lines, index, beginning) {
 
     if (orderedListRegex.test(contentBeginning.string)) return handleBlockquoteOrderedList(lines, index, beginning, contentBeginning);
 
+    if (markdownTextRegex.test(contentBeginning.string)) return handleBlockquoteParagraph(lines, index, beginning, contentBeginning);
     return {
         category: 'undefined',
         type: 'blockquote',
@@ -409,6 +410,14 @@ function handleBlockquoteOrderedList (lines, index, beginning, contentBeginning)
     return {
         category: 'undefined',
         type: 'blockquoteOrderedList',
+        inc: 1
+    }
+}
+
+function handleBlockquoteParagraph (lines, index, beginning, contentBeginning) {
+    return {
+        category: 'undefined',
+        type: 'blockquoteParagraph',
         inc: 1
     }
 }
