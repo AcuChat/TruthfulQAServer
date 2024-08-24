@@ -29,13 +29,30 @@ function isValidUrl(str) {
 const storeWikiHtml = async () => {
     const wiki = await sql.wikipediaQuestions();
    
-    for (let i = 0; i < wiki.length; ++i) {    
-        let url = extractWikipediaUrl(wiki[i].source);
+    for (let i = 0; i < wiki.length; ++i) {  
+        const { id, question, source } = wiki[i];  
+        let url = extractWikipediaUrl(source);
         url = url.replaceAll(';', '');
         const isUrl = isValidUrl(url);
         if (!isUrl) continue;
 
+        // At this point, we have a wikipedia url
+
+        url = html.stripAnchorFromUrl(url);
+        console.log(url); break;
+
+        // If we already have the url then skip it
+        const status = await sql.getUrlStatus(url);
+        if (status.length) continue;
+
         const response = await axios.get(url);
+        const { data } = response;
+
+        // add raw data to content (url, raw)
+
+        // add id, url to sources table
+
+
         const q = `INSERT INTO sources (id, raw_content) VALUES (${wiki[i].id}, ${sql.escape(response.data)})`;
         const r = await sql.query(q);
     }
@@ -70,6 +87,7 @@ const mdToJson = async (num) => {
     }
 }
 
+storeWikiHtml();
 //sql.resetContent();
 //processContent();
 //mdToJson(5);

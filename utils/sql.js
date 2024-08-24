@@ -117,4 +117,10 @@ exports.getUrlStatus = async (url) => {
     return r;
 }
 
+exports.addUrlRaw = async (url, raw) => {
+    const q = `INSERT INTO content (url, raw) VALUES (${exports.escape(url)}, ${exports.escape(raw)}) ON DUPLICATE KEY UPDATE raw = VALUES(raw)`;
+    const r = await exports.query(q);
+    return r;
+}
+
 createTables();
