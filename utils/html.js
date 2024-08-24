@@ -3,6 +3,13 @@ const { Readability } = require("@mozilla/readability");
 const TurndownService = require('turndown');
 
 
+
+exports.stripAnchorFromUrl = url => {
+    const loc = url.indexOf('#');
+    if (loc === -1) return url;
+    return url.substring(0, loc);
+}
+
 // Function to remove CSS content from HTML string
 exports.removeCSSContent = (html) => {
     // Remove CSS content
