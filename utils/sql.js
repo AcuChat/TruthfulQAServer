@@ -66,8 +66,7 @@ const createTables = async () => {
 
     q = `CREATE TABLE IF NOT EXISTS sources (
         id BIGINT NOT NULL PRIMARY KEY,
-        raw_content MEDIUMTEXT,
-        content MEDIUMTEXT
+        url VARCHAR(2048) CHARACTER SET ascii NOT NULL
     )`
 
     r = await this.query(q);
