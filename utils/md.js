@@ -395,9 +395,20 @@ function handleBlockquote (lines, index, beginning) {
     const contentBeginning = parseBeginning(content);
     console.log('contentBeginning', contentBeginning);
 
+    if (orderedListRegex.test(contentBeginning.string)) return handleBlockquoteOrderedList(lines, index, beginning, contentBeginning);
+
     return {
         category: 'undefined',
         type: 'blockquote',
+        inc: 1
+    }
+}
+
+function handleBlockquoteOrderedList (lines, index, beginning, contentBeginning) {
+
+    return {
+        category: 'undefined',
+        type: 'blockquoteOrderedList',
         inc: 1
     }
 }
