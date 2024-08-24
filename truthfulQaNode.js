@@ -62,19 +62,17 @@ const storeWikiHtml = async () => {
 
 const processContent = async () => {
     while (true) {
-        const wiki = await sql.nextUnprocessedWiki();
-        if (!wiki.length) return;
-        // const article = await html.htmlToTextViaReadability(wiki[0].raw_content);
-        // const fullArticle = article.title && article.textBody ? article.title + "\n\n" + article.textBody : '';
-        const fullArticle = html.htmlToMarkdownViaTurndown(wiki[0].raw_content, true);
+        const next = await sql.nextUnprocessedRaw();
+        if (!next.length) return;
+        const { url, raw } = next[0];
+        const fullArticle = html.htmlToMarkdownViaTurndown(raw, true);
 
         if (fullArticle) {
-            const q = `UPDATE sources SET content = ${sql.escape(fullArticle)} WHERE id = ${wiki[0].id}`;
+            const q = `UPDATE content SET md = ${sql.escape(fullArticle)}, status = 'md' WHERE url = ${sql.escape(url)}`;
             const r = await sql.query(q);
-            console.log('id', wiki[0].id);
+            console.log('url', url);
         }
     }
-    
 }
 
 const mdToJson = async (num) => {
@@ -87,7 +85,7 @@ const mdToJson = async (num) => {
     }
 }
 
-storeWikiHtml();
+//storeWikiHtml();
 //sql.resetContent();
-//processContent();
+processContent();
 //mdToJson(5);
