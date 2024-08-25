@@ -17,7 +17,8 @@ const markdownTextRegex = /^[a-zA-Z0-9\\~^."'—]/;
 const unorderdListTextRegex = /^\s*[*+-]\s+(.*)$/;
 const orderedListTextRegex = /^\s*\d+\.\s+(.*)$/;
 //const stringStartsWithLinkRegex = /^\[(?:[^\[\]]|\[(?:[^\[\]]|\[(?:[^\[\]]|\[[^\[\]]*\])*\])*\])*\]\([^\s()]+(?:\s+(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\)))?\)/;
-const stringStartsWithLinkRegex = /^\[(?:[^\[\]]|\[(?:[^\[\]]|\[(?:[^\[\]]|\[[^\[\]]*\])*\])*\])*\](?:\([^\s()]+(?:\s+(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\)))?\)|\[[^\]]*\])/
+//const stringStartsWithLinkRegex = /^\[(?:[^\[\]]|\[(?:[^\[\]]|\[(?:[^\[\]]|\[[^\[\]]*\])*\])*\])*\](?:\([^\s()]+(?:\s+(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\)))?\)|\[[^\]]*\])/
+const stringStartsWithLinkRegex = /^\[(?:[^\[\]]|\[[^\[\]]*\])*\](?:\(.*?\)|\[.*?\])/
 const previousLineIsHeadingRegex = /^\s*={2,}$/;
 const previousLineIsSubheadingRegex = /^\s*-{2,}$/;
 const entireLineIsImageRegex = /^!\[([^\]]*)\]\(([^\s\)]+)(?:\s+"([^"]*)")?\)$/;
