@@ -130,13 +130,12 @@ function handleParagraph (lines, index, beginning) {
 
 
 
-function handleLink (lines, index, beginning) {
+function handleLink (lines, index, beginning, maxLines=5) {
     console.log('\n\nhandleLink')
     const depth = Math.floor(beginning.startingWhitespace / 4);
-    const text = lines[index].substring(beginning.startingWhitespace);
+    let text = lines[index].substring(beginning.startingWhitespace);
 
     console.log('link text', text);
-
     
     /** 
      * Three possibilities:
@@ -145,24 +144,30 @@ function handleLink (lines, index, beginning) {
      *   3) Line contains link and other things and therefore is paragraph  
      */
 
-    const isLink = linkRegex.test(text);
-   
-    if (isLink) {
-        return {
-            category: 'Link',
-            raw: lines[index],
-            inc: 1
+    let count = 0;
+    while (count < maxLines) {
+        const isLink = linkRegex.test(text);
+       
+        if (isLink) {
+            return {
+                category: 'Link',
+                raw: text,
+                inc: count + 1
+            }
         }
-    }
+    
+        let test = stringStartsWithLinkRegex.test(text);
+        if (test) {
+            return {
+                category: 'paragraph',
+                raw: text,
+                depth,
+                inc: count + 1
+            }
+        }
 
-    let test = stringStartsWithLinkRegex.test(text);
-    if (test) {
-        return {
-            category: 'paragraph',
-            raw: text,
-            depth,
-            inc: 1
-        }
+        ++count;
+        text += lines[index + count];
     }
 
     return {
