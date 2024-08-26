@@ -1,5 +1,6 @@
 const mdUtil = require('./md');
 const _ = require('lodash');
+const spacy = require('./spacy')
 
 exports.getLines = async (md) => {
     const rawLines = await mdUtil.mdToAcuJson(md);
@@ -108,4 +109,14 @@ exports.getLines = async (md) => {
     }
 
     return lines;
+}
+
+exports.getSentences = async (lines) => {
+    const paragraphs = lines.map(line => line?.raw ? line.raw : '');
+    const sents = await spacy.spacy('sentences', {content: paragraphs.join("\n")});
+    console.log(sents);
+    const sentences = [];
+
+
+    return sentences;
 }
