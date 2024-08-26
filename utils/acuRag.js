@@ -99,12 +99,11 @@ exports.getLines = async (md) => {
         line.blockQuoteHeadings = _.cloneDeep(blockQuoteHeadings);
         lines.push(line);
 
-        if (lines.length > 2 && lines[lines.length-2].intro) {
-            console.log('\n\n\n');
-            console.log(lines[lines.length-2], lines[lines.length-1]);
-            break;
-        }
-
+        // if (lines.length > 2 && lines[lines.length-2].intro) {
+        //     console.log('\n\n\n');
+        //     console.log(lines[lines.length-2], lines[lines.length-1]);
+        //     break;
+        // }
         
     }
 

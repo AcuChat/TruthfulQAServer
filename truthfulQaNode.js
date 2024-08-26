@@ -85,6 +85,7 @@ const mdToJson = async (num) => {
         //const json = mdUtil.mdToAcuJson(md);
         
         const lines = await acuRag.getLines(md);
+        console.log(lines);
         console.log(i, url);
         // if (json === false) break;
         // q = `UPDATE content SET json = ${sql.escape(JSON.stringify(json))}, status = 'json' WHERE url = ${sql.escape(url)}`;
@@ -93,6 +94,8 @@ const mdToJson = async (num) => {
         break;
     }
 }
+
+
 
 //storeWikiHtml();
 //sql.resetContent();
