@@ -16,9 +16,18 @@ exports.getLines = async (md) => {
     
         switch (category) {
             case 'previousLineIsHeading':
-                if (lines.length) lines[lines.length-1].category = 'heading';
+                if (lines.length) {
+                    lines[lines.length-1].category = 'heading';
+                    lines[lines.length-1].depth = 0;
+                }
                 break;
-                
+            case 'previousLineIsSubheading':
+                if (lines.length) {
+                    lines[lines.length-1].category = 'heading';
+                    lines[lines.length-1].depth = 1;
+                }
+                break;
+
         }
     
         break;
