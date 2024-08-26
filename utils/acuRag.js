@@ -27,6 +27,12 @@ exports.getLines = async (md) => {
                     lines[lines.length-1].depth = 1;
                 }
                 break;
+            case 'blockquotePreviousLineIsHeading':
+                if (lines.length) {
+                    lines[lines.length-1].category = 'blockquoteHeading';
+                    lines[lines.length-1].depth = 0;
+                }
+                break;
 
         }
     
