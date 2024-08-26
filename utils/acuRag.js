@@ -30,6 +30,9 @@ exports.getLines = async (md) => {
     
         let handled = false;
         switch (category) {
+            case 'whitespace':
+                handled = true;
+                break;
             case 'previousLineIsHeading':
                 if (lines.length) {
                     lines[lines.length-1].category = 'heading';
@@ -62,20 +65,42 @@ exports.getLines = async (md) => {
                 let { depth } = line;
                 ++depth;
                 headings[`h${depth}`] = line.raw;
+                // reset all depths greater than current depth
                 for (let j = depth + 1; j <= 6; ++j) headings[`h${j}`] = '';
                 break;
             }
+            case 'blockquoteHeading':
+                /**
+                 * TODO
+                 */
+                break;
         }
 
         if (handled) continue;
+
+        // Assign intro field
+
+        let intro = '';
+        if (line?.raw && line.raw.endsWith(':')) intro = line.raw;
+        else if (i < rawLines.length - 1) {
+            const nextCategory = rawLines[i+1].category;
+            test1 = nextCategory.startsWith('list');
+            test2 = !category.startsWith('list');
+            if (test1 && test2) intro = line.raw;
+        }
+        
+        if (index > 0 && !intro) intro = lines[index-1].intro;
+
+        line.intro = intro;
+
         line.index = index++;
         line.headings = _.cloneDeep(headings);
         line.blockQuoteHeadings = _.cloneDeep(blockQuoteHeadings);
         lines.push(line);
 
-        if (lines.length > 2 && lines[lines.length-2].headings.h1) {
+        if (lines.length > 2 && lines[lines.length-2].intro) {
             console.log('\n\n\n');
-            console.log(lines[lines.length-1]);
+            console.log(lines[lines.length-2], lines[lines.length-1]);
             break;
         }
 
