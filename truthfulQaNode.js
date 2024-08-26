@@ -3,6 +3,7 @@ const sql = require('./utils/sql');
 const html = require('./utils/html');
 const axios = require('axios');
 const mdUtil = require('./utils/md');
+const acuRag = require('./utils/acuRag');
 
 function extractWikipediaUrl(text) {
     // Define the regex pattern for Wikipedia URLs
@@ -77,17 +78,23 @@ const processContent = async () => {
 
 const mdToJson = async (num) => {
     for (let i = 0; i < num; ++i) {
-        const q = `SELECT url, md FROM content WHERE status = 'md' LIMIT ${num}`;
-        const r = await sql.query(q);
+        let q = `SELECT url, md FROM content WHERE status = 'md' LIMIT ${num}`;
+        let r = await sql.query(q);
         if (!r.length) break;
         const { url, md } = r[0];
-        console.log(url);
-        const result = mdUtil.mdToAcuJson(md);
-        if (result === false) break;
+        //const json = mdUtil.mdToAcuJson(md);
+        
+        const lines = await acuRag.getLines(md);
+        console.log(i, url);
+        // if (json === false) break;
+        // q = `UPDATE content SET json = ${sql.escape(JSON.stringify(json))}, status = 'json' WHERE url = ${sql.escape(url)}`;
+        // r = await sql.query(q);
+        // console.log(r);
+        break;
     }
 }
 
 //storeWikiHtml();
 //sql.resetContent();
 //processContent();
-mdToJson(5);
+mdToJson(100);
