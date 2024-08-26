@@ -30,6 +30,7 @@ exports.getLines = async (md) => {
     
         let handled = false;
         switch (category) {
+            case 'blankLine':
             case 'whitespace':
                 handled = true;
                 break;
