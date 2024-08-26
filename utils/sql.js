@@ -136,4 +136,5 @@ exports.addIdUrl = async (id, url) => {
     return r;
 }
 
-createTables();
+//createTables();
+//initializeTable();

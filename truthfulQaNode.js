@@ -55,7 +55,7 @@ const storeWikiHtml = async () => {
         // add raw data to content (url, raw)
         await sql.addUrlRaw(url, data);
 
-        
+        console.log(url);
     }
 }
 
