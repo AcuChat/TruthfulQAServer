@@ -75,7 +75,6 @@ const extractMarkdownFormatting = lines => {
         const line = lines[i];
         let { citText } = line;
         line.formatting = mdUtil.extractMarkdownFormatting(citText);
-        console.log('line.formatting', line.formatting)
         for (let j = 0; j < line.formatting.length; ++j) {
             citText = citText.replace(line.formatting[j].fullText, line.formatting[j].plainText)
         }

@@ -76,36 +76,46 @@ exports.parseMarkdownImages = (text) => {
     return images;
 }
 exports.extractBibliographicCitations = (text) => {
-    const citationPattern = /([A-Za-z]+,\s[A-Za-z]+\s\([A-Za-z]+\s\d{1,2},\s\d{4}\)\.\s"[^"]+"\.\s_[^_]+_\..*?(?=\n|\.\s|$))/g;
-    const titlePattern = /"([^"]+)"/;
+  const citationPattern = /([A-Za-z]+,\s[A-Za-z]+(?:\s[A-Z]\.)?\s\((?:[A-Za-z]+\s)?\d{1,2},\s\d{4}\)\.\s"[^"]+"\.\s_[^_]+_\.(?:.*?(?=\n|\.\s|$)))/g;
+  const titlePattern = /"([^"]+)"/;
 
-    const citations = [];
-    let match;
+  const citations = [];
+  let match;
 
-    while ((match = citationPattern.exec(text)) !== null) {
-        const fullText = match[0].trim();
-        const titleMatch = fullText.match(titlePattern);
-        const title = titleMatch ? titleMatch[1] : '';
+  while ((match = citationPattern.exec(text)) !== null) {
+    const fullText = match[0].trim();
+    const titleMatch = fullText.match(titlePattern);
+    const title = titleMatch ? titleMatch[1] : '';
 
-        citations.push({
-        fullText: fullText,
-        title: title
-        });
-    }
+    citations.push({
+      fullText: fullText,
+      title: title
+    });
+  }
 
-    return citations;
+  return citations;
+}
+
+function isLikelyUrl(str) {
+    return /https?:\/\/|www\.|\.\w+\//.test(str);
 }
 
 exports.extractMarkdownFormatting = (line) => {
     const result = [];
-    const regex = /(\*\*\*|_\*\*|\*\*_|\*\*|___|__|_)(.+?)\1/g;
+    // Updated regex to be more specific about formatting patterns
+    const regex = /(\*\*\*|_\*\*|\*\*_|\*\*|___)(?!\s)(.+?)(?<!\s)\1|\b_((?!\s)(?:[^_]|(?<=\S)_(?=\S))+?)_\b/g;
     let match;
   
     while ((match = regex.exec(line)) !== null) {
       const fullText = match[0];
-      const formatting = match[1];
-      const plainText = match[2];
+      const formatting = match[1] || '_'; // Handle single underscore case
+      const plainText = match[2] || match[4]; // match[4] for single underscore case
       let type;
+  
+      // Check if it's a false positive (e.g., part of a URL)
+      if (isLikelyUrl(fullText)) {
+        continue;
+      }
   
       switch (formatting) {
         case '***':
@@ -117,9 +127,15 @@ exports.extractMarkdownFormatting = (line) => {
           type = 'bold';
           break;
         case '___':
-        case '__':
-        case '_':
           type = 'italic';
+          break;
+        case '_':
+          // Additional check for single underscore to avoid false positives
+          if (fullText.startsWith('_') && fullText.endsWith('_') && fullText.length > 2) {
+            type = 'italic';
+          } else {
+            continue; // Skip this match if it's not a valid italic formatting
+          }
           break;
       }
   
