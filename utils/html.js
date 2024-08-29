@@ -49,13 +49,6 @@ exports.removeFullCSSContent = (html) => {
 exports.htmlToMarkdownViaTurndown = (html, stripCss = false) => {
     const dom = new JSDOM(html);
     const bodyInnerHTML = dom.window.document.body.innerHTML;
-    
-    if (!stripCss) {
-        const turndownService = new TurndownService();
-        const markdown = turndownService.turndown(bodyInnerHTML);
-        
-        return markdown;
-    }
 
     const TurndownService = require('turndown');
 
@@ -67,11 +60,11 @@ exports.htmlToMarkdownViaTurndown = (html, stripCss = false) => {
 
     
     // Wrap the original turndown method
-    const originalTurndown = turndownService.turndown;
-    turndownService.turndown = function(html) {
-        const htmlWithoutCSS = exports.removeCSSContent(html);
-        return originalTurndown.call(this, htmlWithoutCSS);
-    };
+    // const originalTurndown = turndownService.turndown;
+    // turndownService.turndown = function(html) {
+    //     const htmlWithoutCSS = exports.removeCSSContent(html);
+    //     return originalTurndown.call(this, htmlWithoutCSS);
+    // };
       
     // Use the modified turndownService to convert HTML to Markdown
     const markdown = turndownService.turndown(html);
