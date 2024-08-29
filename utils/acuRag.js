@@ -58,6 +58,19 @@ const extractImageText = lines => {
     }
 }
 
+const extractBibliographicCitations = lines => {
+    for (let i = 0; i < lines.length; ++i) {
+        const line = lines[i];
+        let { imgText } = line;
+        line.citations = mdUtil.extractBibliographicCitations(imgText)
+        for (let j = 0; j < line.citations.length; ++j) {
+            imgText = imgText.replace(line.citations[j].fullText, line.citations[j].title);
+        }
+        line.citText = imgText;
+        if (line.citations.length) console.log(line);
+    }
+}
+
 exports.getLines = async (md) => {
     const rawLines = await mdUtil.mdToAcuJson(md);
     const lines = [];
@@ -166,19 +179,19 @@ exports.getLines = async (md) => {
 
     extractLinkText(lines);
     extractImageText(lines);
+    extractBibliographicCitations(lines);
 
     return lines;
 }
 
 exports.getSentences = async (lines) => {
-    const paragraphs = lines.map(line => line?.plaintext ? line.plaintext : '');
-    
+    const paragraphs = lines.map(line => line?.imgText ? line.imgText : '');
     getCurrentTime();
-    const sentsArr = await spacy.spacy('sentences', {content: paragraphs.join("\n")});
-    console.log(sentsArr)
+    const sentsStr = await spacy.spacy('sentences', {content: paragraphs.join("\n")});
+    const sentsArr = JSON.parse(sentsStr);
     const sents = sentsArr.map(s => s.sent);
-    //const sents = await services.splitSentences(paragraphs.join("\n"));
     getCurrentTime();
     console.log('sents', sents);
     return sents;
 }
+

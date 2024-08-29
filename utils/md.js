@@ -75,6 +75,26 @@ exports.parseMarkdownImages = (text) => {
     
     return images;
 }
+exports.extractBibliographicCitations = (text) => {
+    const citationPattern = /([A-Za-z]+,\s[A-Za-z]+\s\([A-Za-z]+\s\d{1,2},\s\d{4}\)\.\s"[^"]+"\.\s_[^_]+_\..*?(?=\n|\.\s|$))/g;
+    const titlePattern = /"([^"]+)"/;
+
+    const citations = [];
+    let match;
+
+    while ((match = citationPattern.exec(text)) !== null) {
+        const fullText = match[0].trim();
+        const titleMatch = fullText.match(titlePattern);
+        const title = titleMatch ? titleMatch[1] : '';
+
+        citations.push({
+        fullText: fullText,
+        title: title
+        });
+    }
+
+    return citations;
+}
 
 function isMarkdownLink(str) {
     return markdownLinkRegex.test(str);
