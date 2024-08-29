@@ -24,7 +24,40 @@ const previousLineIsSubheadingRegex = /^\s*-{2,}$/;
 const entireLineIsImageRegex = /^!\[([^\]]*)\]\(([^\s\)]+)(?:\s+"([^"]*)")?\)$/;
 const headingTextRegex = /^\s*#+\s+(.+)$/;
 const blockquoteRegex = /^((?:>\s*)+)(.*)$/;
+const generalLinkRegex = /(!?\[(?:[^\[\]]|\[[^\[\]]*\])*\])(\((?:[^()]|\([^()]*(?:\([^()]*\)[^()]*)*\))*\))/;
 
+exports.containsMarkdownLinks = (content) => {
+    // This regex looks for markdown links anywhere in the text
+   
+    
+    // Test if the content contains at least one link
+    return generalLinkRegex.test(content);
+  }
+
+  exports.parseMarkdownLinks = (content) => {
+    const linkRegex = /(!?\[(?<text>(?:[^\[\]]|\[[^\[\]]*\])*)\])(\((?<url>[^)"]+)(?:\s+"(?<title>[^"]*)")?\))/g;
+    let plaintext = content;
+    const links = [];
+    let match;
+  
+    while ((match = linkRegex.exec(content)) !== null) {
+      const { text, url, title } = match.groups;
+      
+      links.push({
+        text: text,
+        url: url,
+        title: title || ''
+      });
+  
+      // Replace the link with just the text for plaintext
+      plaintext = plaintext.replace(match[0], text);
+    }
+  
+    return {
+      plaintext: plaintext,
+      links: links
+    };
+  }
 
 function isMarkdownLink(str) {
     return markdownLinkRegex.test(str);

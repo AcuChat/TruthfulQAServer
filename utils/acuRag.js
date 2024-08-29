@@ -3,6 +3,44 @@ const _ = require('lodash');
 const spacy = require('./spacy');
 const services = require('./services');
 
+function getCurrentTime() {
+    const now = new Date();
+    
+    // Get hours, minutes, and seconds
+    let hours = now.getHours();
+    let minutes = now.getMinutes();
+    let seconds = now.getSeconds();
+    
+    // Pad with leading zeros if necessary
+    hours = hours.toString().padStart(2, '0');
+    minutes = minutes.toString().padStart(2, '0');
+    seconds = seconds.toString().padStart(2, '0');
+    
+    console.log(`${hours}:${minutes}:${seconds}`)
+    // Combine into hh:mm:ss format
+    return `${hours}:${minutes}:${seconds}`;
+}
+
+const extractLinkText = lines => {
+    let count = 0;
+    for (let i = 0; i < lines.length; ++i) {
+        const line = lines[i];
+        const { raw } = line;
+        //let test = mdUtil.containsMarkdownLinks(raw);
+        const parts = mdUtil.parseMarkdownLinks(raw);
+        line.linkText = parts.plaintext;
+        line.links = parts.links;
+        console.log(line);
+        // if (test) {
+        //     console.log("FOUND LINK");
+        //     console.log(raw);
+        //     console.log(parts)
+        //     console.log(`\n\n`);
+        //     ++count;
+        // }
+    }
+}
+
 exports.getLines = async (md) => {
     const rawLines = await mdUtil.mdToAcuJson(md);
     const lines = [];
@@ -109,22 +147,19 @@ exports.getLines = async (md) => {
         
     }
 
+    extractLinkText(lines);
+
     return lines;
 }
 
 exports.getSentences = async (lines) => {
-    const paragraphs = lines.map(line => line?.raw ? line.raw : '');
+    const paragraphs = lines.map(line => line?.plaintext ? line.plaintext : '');
     
-    //const sents = await spacy.spacy('sentences', {content: paragraphs.join("\n")});
-   
-    const sents = [];
-
-    for (let i = 0; i < paragraphs.length; ++i) {
-        console.log(paragraphs[i]);
-        sents.push(await services.splitSentences(paragraphs[i]));
-        console.log(sents[i]);
-        break;
-    }
-
-    return sentences;
+    getCurrentTime();
+    const sentsArr = await spacy.spacy('sentences', {content: paragraphs.join("\n")});
+    const sents = sentsArr.map(s => s.sent);
+    //const sents = await services.splitSentences(paragraphs.join("\n"));
+    getCurrentTime();
+    console.log('sents', sents);
+    return sents;
 }
