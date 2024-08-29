@@ -107,7 +107,7 @@ const test = async () => {
     console.log('md', md);
 
     const lines = await acuRag.getLines(md);
-    console.log(lines[0], lines[1], lines[2])
+    console.log('\n\n\nline', lines[0], lines[1], lines[2])
 }
 
 //storeWikiHtml();
