@@ -28,6 +28,7 @@ const extractLinkText = lines => {
         const { raw } = line;
         //let test = mdUtil.containsMarkdownLinks(raw);
         const parts = mdUtil.parseMarkdownLinks(raw);
+        console.log('parts', parts)
         line.linkText = parts.plaintext;
         line.links = parts.links;
         console.log(line);
@@ -38,6 +39,22 @@ const extractLinkText = lines => {
         //     console.log(`\n\n`);
         //     ++count;
         // }
+    }
+}
+
+const extractImageText = lines => {
+    let count = 0;
+    for (let i = 0; i < lines.length; ++i) {
+        const line = lines[i];
+        let { linkText } = line;
+        line.images = mdUtil.parseMarkdownImages(linkText);
+        for (let j = 0; j < line.images.length; ++j) {
+            linkText = linkText.replace(line.images[j].fullText, line.images[j].alt);
+        }
+        line.imgText = linkText;
+        if (line.images.length) {
+            console.log(line);
+        }
     }
 }
 
@@ -148,6 +165,7 @@ exports.getLines = async (md) => {
     }
 
     extractLinkText(lines);
+    extractImageText(lines);
 
     return lines;
 }
@@ -157,6 +175,7 @@ exports.getSentences = async (lines) => {
     
     getCurrentTime();
     const sentsArr = await spacy.spacy('sentences', {content: paragraphs.join("\n")});
+    console.log(sentsArr)
     const sents = sentsArr.map(s => s.sent);
     //const sents = await services.splitSentences(paragraphs.join("\n"));
     getCurrentTime();

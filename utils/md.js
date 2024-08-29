@@ -34,30 +34,47 @@ exports.containsMarkdownLinks = (content) => {
     return generalLinkRegex.test(content);
   }
 
-  exports.parseMarkdownLinks = (content) => {
+exports.parseMarkdownLinks = (content) => {
     const linkRegex = /(!?\[(?<text>(?:[^\[\]]|\[[^\[\]]*\])*)\])(\((?<url>[^)"]+)(?:\s+"(?<title>[^"]*)")?\))/g;
     let plaintext = content;
     const links = [];
     let match;
-  
+
     while ((match = linkRegex.exec(content)) !== null) {
-      const { text, url, title } = match.groups;
-      
-      links.push({
+        const { text, url, title } = match.groups;
+        
+        links.push({
         text: text,
         url: url,
         title: title || ''
-      });
-  
-      // Replace the link with just the text for plaintext
-      plaintext = plaintext.replace(match[0], text);
+        });
+
+        // Replace the link with just the text for plaintext
+        plaintext = plaintext.replace(match[0], text);
     }
-  
+
     return {
-      plaintext: plaintext,
-      links: links
+        plaintext: plaintext,
+        links: links
     };
-  }
+}
+
+exports.parseMarkdownImages = (text) => {
+    const imageRegex = /!\[([^\]]*)\]\(([^\s\)]+)(?:\s+"([^"]*)")?\)/g;
+    const images = [];
+    let match;
+    
+    while ((match = imageRegex.exec(text)) !== null) {
+        images.push({
+            fullText: match[0],
+            alt: match[1] || '',
+            url: match[2],
+            title: match[3] || ''
+        });
+    }
+    
+    return images;
+}
 
 function isMarkdownLink(str) {
     return markdownLinkRegex.test(str);

@@ -107,8 +107,8 @@ const test = async () => {
     console.log('md', md);
 
     const lines = await acuRag.getLines(md);
-    console.log('\n\n\nline', lines[0], lines[1], lines[2]);
-    const sentences = await acuRag.getSentences(lines);
+    // console.log('\n\n\nline', lines[0], lines[1], lines[2]);
+    // const sentences = await acuRag.getSentences(lines);
 }
 
 //storeWikiHtml();
