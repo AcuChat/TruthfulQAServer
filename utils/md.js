@@ -96,6 +96,43 @@ exports.extractBibliographicCitations = (text) => {
     return citations;
 }
 
+exports.extractMarkdownFormatting = (line) => {
+    const result = [];
+    const regex = /(\*\*\*|_\*\*|\*\*_|\*\*|___|__|_)(.+?)\1/g;
+    let match;
+  
+    while ((match = regex.exec(line)) !== null) {
+      const fullText = match[0];
+      const formatting = match[1];
+      const plainText = match[2];
+      let type;
+  
+      switch (formatting) {
+        case '***':
+        case '_**':
+        case '**_':
+          type = 'boldItalic';
+          break;
+        case '**':
+          type = 'bold';
+          break;
+        case '___':
+        case '__':
+        case '_':
+          type = 'italic';
+          break;
+      }
+  
+      result.push({
+        fullText,
+        type,
+        plainText
+      });
+    }
+  
+    return result;
+}
+
 function isMarkdownLink(str) {
     return markdownLinkRegex.test(str);
 }

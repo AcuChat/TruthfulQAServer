@@ -67,7 +67,20 @@ const extractBibliographicCitations = lines => {
             imgText = imgText.replace(line.citations[j].fullText, line.citations[j].title);
         }
         line.citText = imgText;
-        if (line.citations.length) console.log(line);
+    }
+}
+
+const extractMarkdownFormatting = lines => {
+    for (let i = 0; i < lines.length; ++i) {
+        const line = lines[i];
+        let { citText } = line;
+        line.formatting = mdUtil.extractMarkdownFormatting(citText);
+        console.log('line.formatting', line.formatting)
+        for (let j = 0; j < line.formatting.length; ++j) {
+            citText = citText.replace(line.formatting[j].fullText, line.formatting[j].plainText)
+        }
+        line.formText = citText;
+        if (line.formatting.length) console.log('EHLO', line);
     }
 }
 
@@ -180,16 +193,18 @@ exports.getLines = async (md) => {
     extractLinkText(lines);
     extractImageText(lines);
     extractBibliographicCitations(lines);
+    extractMarkdownFormatting(lines);
 
     return lines;
 }
 
 exports.getSentences = async (lines) => {
-    const paragraphs = lines.map(line => line?.imgText ? line.imgText : '');
+    const paragraphs = lines.map(line => line?.citText ? line.citText : '');
     getCurrentTime();
-    const sentsStr = await spacy.spacy('sentences', {content: paragraphs.join("\n")});
-    const sentsArr = JSON.parse(sentsStr);
-    const sents = sentsArr.map(s => s.sent);
+    // const sentsStr = await spacy.spacy('sentences', {content: paragraphs.join("\n")});
+    // const sentsArr = JSON.parse(sentsStr);
+    // const sents = sentsArr.map(s => s.sent);
+    const sents = await services.splitSentences(paragraphs.join("\n"));
     getCurrentTime();
     console.log('sents', sents);
     return sents;
