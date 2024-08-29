@@ -105,6 +105,9 @@ const test = async () => {
     const md = html.htmlToMarkdownViaTurndown(article);
     console.log('article',article);
     console.log('md', md);
+
+    const lines = await acuRag.getLines(md);
+    console.log(lines[0], lines[1], lines[2])
 }
 
 //storeWikiHtml();
