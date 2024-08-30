@@ -206,26 +206,37 @@ exports.getLines = async (md) => {
     return lines;
 }
 
-exports.getSentences = async (lines) => {
+exports.getSentences = async (lines, max = 20) => {
     //const paragraphs = lines.map(line => line?.plainText ? line.plainText : '');
     getCurrentTime();
     // const sentsStr = await spacy.spacy('sentences', {content: paragraphs.join("\n")});
     // const sentsArr = JSON.parse(sentsStr);
     // const sents = sentsArr.map(s => s.sent);
 
+    /** 
+     * TODO: Setup multiple sentence splitters on GPUs and process the sentences in parallel batches
+     */
+
+    let count = 0;
+
     for (let i = 0; i < lines.length; ++i) {
         const line = lines[i];
         if (!line?.plainText) {
             line.sentences = [];
         } else {
-            lines.sentences = await services.splitSentences(line.plainText);
+            const words = line.plainText.split(" ");
+            if (words.length <= max) line.sentences = [line.plainText];
+            else {
+                console.log(count++, i);
+                line.sentences = await services.splitSentences(line.plainText);
+            }
         }
-        console.log(line);
+        //console.log(line);
     }
 
     //const sents = await services.splitSentences(paragraphs.join("\n"));
     getCurrentTime();
     //console.log('sents', sents);
-    return sents;
+    return;
 }
 
