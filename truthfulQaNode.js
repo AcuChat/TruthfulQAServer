@@ -114,6 +114,7 @@ const test = async () => {
     await acuRag.getSentences(lines);
     const paragraphs = lines.map(line => line.sentences.join(" "));
     console.log(paragraphs);
+    const result = await steps.simplifyRoutes(paragraphs.join("\n"));
 }
 
 //storeWikiHtml();

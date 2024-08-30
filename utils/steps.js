@@ -127,7 +127,7 @@ exports.splitQuery = async (ownerId, prompt, baseModel='gpt-3.5-turbo') => {
     return response;
 }
 
-exports.simplifyRoutes = async (ownerId, texts, baseModel='gpt-3.5-turbo') => {
+exports.simplifyRoutes = async (text, baseModel='gpt-3.5-turbo') => {
     let simpleSentencesModel = '';
     let coreferenceModel = '';
 
@@ -149,14 +149,9 @@ exports.simplifyRoutes = async (ownerId, texts, baseModel='gpt-3.5-turbo') => {
 
     let response;
     try {
-        let promises = [];
-        for (let i = 0; i < texts.length; ++i) {
-            promises.push(ai.queryFineTunedModelByName(ownerId, simpleSentencesModel, texts[i]))
-        }
-
-        let responses = await Promise.all(promises);
-        
-        for (let i = 0; i < responses.length; ++i) if (responses[i].status !== 'success') {
+        let response = await ai.queryFineTunedModelByName(ownerId, simpleSentencesModel, texts[i]))
+       
+        if (response.status !== 'success') {
             console.error('simplifyRoutes error', responses[i])
             return {
                 status: 'error',
@@ -164,14 +159,11 @@ exports.simplifyRoutes = async (ownerId, texts, baseModel='gpt-3.5-turbo') => {
             }
         }
 
-        const simpleSentences = responses.map(r => r.content);
-    
-        promises = [];
-        for (let i = 0; i < responses.length; ++i) promises.push(ai.queryFineTunedModelByName(ownerId, coreferenceModel, responses[i].content))
+        const simpleSentences = response.content;
+        
+        response = await ai.queryFineTunedModelByName(ownerId, coreferenceModel, responses[i].content))
 
-        responses = await Promise.all(promises);
-
-        for (let i = 0; i < responses.length; ++i) if (responses[i].status !== 'success') {
+        if (response.status !== 'success') {
             console.error('simplifyRoutes CoReferencedSteps error', responses[i])
             return {
                 status: 'error',
@@ -179,8 +171,7 @@ exports.simplifyRoutes = async (ownerId, texts, baseModel='gpt-3.5-turbo') => {
             }
         }
 
-        const results = responses.map(response => response.content);
-
+        const results = response.content;
         response = {
             status: 'success',
             reason: 'stop',
