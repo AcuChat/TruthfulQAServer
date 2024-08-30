@@ -1,6 +1,4 @@
 require('dotenv').config();
-const redis = require('./redis');
-const debug = require('./debug');
 
 const { OPEN_AI_KEY } = process.env;
 
@@ -37,13 +35,13 @@ exports.getChatbotArticleBasedOnQueryFactSets = async (userId, queryFactSets, mo
             continue;
         };
         const messages = ai.initialMessagePair(queryFactSets[i].factSet.join(""), systemPrompt);
-        debug.storeObj(messages, `ChatbotArticlePrompt_${i}`);
+        //debug.storeObj(messages, `ChatbotArticlePrompt_${i}`);
         promises.push(ai.openAIGenericChatCompletion(userId, OPEN_AI_KEY, model, messages, temperature || .4, max_tokens || null))
     }
 
     response = await Promise.all(promises);
 
-    debug.storeObj(response, 'ChatbotArticleResponses');
+    //debug.storeObj(response, 'ChatbotArticleResponses');
     
     for (let i = 0; i < response.length; ++i) {
         if (response[i].status !== 'success') {
@@ -60,7 +58,7 @@ exports.getChatbotArticleBasedOnQueryFactSets = async (userId, queryFactSets, mo
         else sections.push(`\n${queryFactSets[i].query}\n${response[i].content}`);
     }
 
-    debug.storeObj(sections, 'QueryFactsSections');
+    //debug.storeObj(sections, 'QueryFactsSections');
     
     return sections.join("\n\n");
 }
@@ -156,10 +154,8 @@ exports.simplifyRoutes = async (ownerId, texts, baseModel='gpt-3.5-turbo') => {
             promises.push(ai.queryFineTunedModelByName(ownerId, simpleSentencesModel, texts[i]))
         }
 
-
         let responses = await Promise.all(promises);
-        debug.storeObj(responses, "simplifyRoutesResponses");
-
+        
         for (let i = 0; i < responses.length; ++i) if (responses[i].status !== 'success') {
             console.error('simplifyRoutes error', responses[i])
             return {
@@ -174,8 +170,6 @@ exports.simplifyRoutes = async (ownerId, texts, baseModel='gpt-3.5-turbo') => {
         for (let i = 0; i < responses.length; ++i) promises.push(ai.queryFineTunedModelByName(ownerId, coreferenceModel, responses[i].content))
 
         responses = await Promise.all(promises);
-
-        debug.storeObj(responses, 'CoReferencedSteps');
 
         for (let i = 0; i < responses.length; ++i) if (responses[i].status !== 'success') {
             console.error('simplifyRoutes CoReferencedSteps error', responses[i])

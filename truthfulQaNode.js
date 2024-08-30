@@ -6,6 +6,7 @@ const mdUtil = require('./utils/md');
 const acuRag = require('./utils/acuRag');
 const services = require('./utils/services');
 const wikipedia = require('./utils/wikipedia');
+const steps = require('./utils/steps');
 
 function extractWikipediaUrl(text) {
     // Define the regex pattern for Wikipedia URLs
@@ -88,6 +89,8 @@ const mdToJson = async (num) => {
         console.log(lines[0], lines[1], lines[2])
         //console.log(lines);
         const sentences = await acuRag.getSentences(lines);
+
+        
 
         console.log(`${sentences.length} sentence chunks`);
         console.log(i, url);

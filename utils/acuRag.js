@@ -207,14 +207,25 @@ exports.getLines = async (md) => {
 }
 
 exports.getSentences = async (lines) => {
-    const paragraphs = lines.map(line => line?.plainText ? line.plainText : '');
+    //const paragraphs = lines.map(line => line?.plainText ? line.plainText : '');
     getCurrentTime();
     // const sentsStr = await spacy.spacy('sentences', {content: paragraphs.join("\n")});
     // const sentsArr = JSON.parse(sentsStr);
     // const sents = sentsArr.map(s => s.sent);
-    const sents = await services.splitSentences(paragraphs.join("\n"));
+
+    for (let i = 0; i < lines.length; ++i) {
+        const line = lines[i];
+        if (!line?.plainText) {
+            line.sentences = [];
+        } else {
+            lines.sentences = await services.splitSentences(line.plainText);
+        }
+        console.log(line);
+    }
+
+    //const sents = await services.splitSentences(paragraphs.join("\n"));
     getCurrentTime();
-    console.log('sents', sents);
+    //console.log('sents', sents);
     return sents;
 }
 
