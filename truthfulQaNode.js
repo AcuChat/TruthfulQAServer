@@ -111,7 +111,9 @@ const test = async () => {
 
     const lines = await acuRag.getLines(md);
     console.log('\n\n\nline', lines[0], lines[1], lines[2]);
-    const sentences = await acuRag.getSentences(lines);
+    await acuRag.getSentences(lines);
+    const paragraphs = lines.map(line => line.sentences.join(" "));
+    console.log(paragraphs);
 }
 
 //storeWikiHtml();
