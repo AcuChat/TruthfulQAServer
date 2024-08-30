@@ -100,10 +100,59 @@ function isLikelyUrl(str) {
     return /https?:\/\/|www\.|\.\w+\//.test(str);
 }
 
+// exports.extractMarkdownFormatting = (line) => {
+//     const result = [];
+//     // Updated regex to be more specific about formatting patterns
+//     const regex = /(\*\*\*|_\*\*|\*\*_|\*\*|___)(?!\s)(.+?)(?<!\s)\1|\b_((?!\s)(?:[^_]|(?<=\S)_(?=\S))+?)_\b/g;
+//     let match;
+  
+//     while ((match = regex.exec(line)) !== null) {
+//       const fullText = match[0];
+//       const formatting = match[1] || '_'; // Handle single underscore case
+//       const plainText = match[2] || match[4]; // match[4] for single underscore case
+//       let type;
+  
+//       // Check if it's a false positive (e.g., part of a URL)
+//       if (isLikelyUrl(fullText)) {
+//         continue;
+//       }
+  
+//       switch (formatting) {
+//         case '***':
+//         case '_**':
+//         case '**_':
+//           type = 'boldItalic';
+//           break;
+//         case '**':
+//           type = 'bold';
+//           break;
+//         case '___':
+//           type = 'italic';
+//           break;
+//         case '_':
+//           // Additional check for single underscore to avoid false positives
+//           if (fullText.startsWith('_') && fullText.endsWith('_') && fullText.length > 2) {
+//             type = 'italic';
+//           } else {
+//             continue; // Skip this match if it's not a valid italic formatting
+//           }
+//           break;
+//       }
+  
+//       result.push({
+//         fullText,
+//         type,
+//         plainText
+//       });
+//     }
+  
+//     return result;
+// }
+
 exports.extractMarkdownFormatting = (line) => {
     const result = [];
-    // Updated regex to be more specific about formatting patterns
-    const regex = /(\*\*\*|_\*\*|\*\*_|\*\*|___)(?!\s)(.+?)(?<!\s)\1|\b_((?!\s)(?:[^_]|(?<=\S)_(?=\S))+?)_\b/g;
+    // Updated regex to be more flexible with what follows the formatting
+    const regex = /(\*\*\*|_\*\*|\*\*_|\*\*|___)(?!\s)(.+?)(?<!\s)\1(?=[^a-zA-Z0-9]|$)|\b_((?!\s)(?:[^_]|(?<=\S)_(?=\S))+?)_\b/g;
     let match;
   
     while ((match = regex.exec(line)) !== null) {

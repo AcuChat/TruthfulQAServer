@@ -83,6 +83,14 @@ const extractMarkdownFormatting = lines => {
     }
 }
 
+const removeMarkdownEscapes = lines => {
+    for (let i = 0; i < lines.length; ++i) {
+        const line = lines[i];
+        let { formText } = line;
+        line.plainText = formText.replace(/\\([[\]\\])/g, '$1');
+    }
+}
+
 exports.getLines = async (md) => {
     const rawLines = await mdUtil.mdToAcuJson(md);
     const lines = [];
@@ -193,12 +201,13 @@ exports.getLines = async (md) => {
     extractImageText(lines);
     extractBibliographicCitations(lines);
     extractMarkdownFormatting(lines);
+    removeMarkdownEscapes(lines);
 
     return lines;
 }
 
 exports.getSentences = async (lines) => {
-    const paragraphs = lines.map(line => line?.citText ? line.citText : '');
+    const paragraphs = lines.map(line => line?.plainText ? line.plainText : '');
     getCurrentTime();
     // const sentsStr = await spacy.spacy('sentences', {content: paragraphs.join("\n")});
     // const sentsArr = JSON.parse(sentsStr);
