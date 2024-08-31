@@ -87,6 +87,7 @@ const removeMarkdownEscapes = lines => {
 
 exports.getLines = async (md) => {
     const rawLines = await mdUtil.mdToAcuJson(md);
+    if (rawLines === false) return false;
     const lines = [];
     let index = 0;
     const headings = {

@@ -108,20 +108,11 @@ const test = async () => {
         console.log(wikiUrls[i].url)
         const article = await wikipedia.getArticleUrlViaCheerio(wikiUrls[i].url);
         const md = html.htmlToMarkdownViaTurndown(article);
-        await sql.query(`UPDATE content SET md = ${sql.escape(md)} WHERE url = ${sql.escape(wikiUrls[i])}`);
+        await sql.query(`UPDATE content SET md = ${sql.escape(md)} WHERE url = ${sql.escape(wikiUrls[i].url)}`);
         const lines = await acuRag.getLines(md);
+        if (lines === false) break;
         await acuRag.getSentences(lines);
-        await sql.query(
-            'UPDATE content SET json = ? WHERE url = ?',
-            [JSON.stringify(lines), wikiUrls[i]],
-            (error, results) => {
-              if (error) {
-                console.error('Error updating record:', error);
-              } else {
-                console.log('Record updated successfully');
-              }
-            }
-          );
+        await sql.query(`UPDATE content SET json = ${sql.escape(JSON.stringify(lines))} WHERE url = ${sql.escape(wikiUrls[i].url)}`);
     }
     
     

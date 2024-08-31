@@ -26,6 +26,29 @@ const headingTextRegex = /^\s*#+\s+(.+)$/;
 const blockquoteRegex = /^((?:>\s*)+)(.*)$/;
 const generalLinkRegex = /(!?\[(?:[^\[\]]|\[[^\[\]]*\])*\])(\((?:[^()]|\([^()]*(?:\([^()]*\)[^()]*)*\))*\))/;
 
+function hasLineBreak(markdownLine) {
+    // Trim the line to remove leading/trailing whitespace
+    const trimmedLine = markdownLine.trim();
+    
+    // Check for explicit line break (two or more spaces at the end)
+    if (/  $/.test(trimmedLine)) {
+      return true;
+    }
+    
+    // Check for backslash line break
+    if (/\\$/.test(trimmedLine)) {
+      return true;
+    }
+    
+    // Check for HTML <br> tag
+    if (/<br\s*\/?>/i.test(trimmedLine)) {
+      return true;
+    }
+    
+    // No line break detected
+    return false;
+  }
+
 exports.containsMarkdownLinks = (content) => {
     // This regex looks for markdown links anywhere in the text
    
@@ -476,11 +499,14 @@ function handleList (lines, index, beginning, type) {
     }
 
 
-        let test = markdownTextRegex.test(text);
-    if (text[0] === '_') test = true;
-    if (text[0] === '*') test = true;
+    
+    // let test = markdownTextRegex.test(text);
+    // if (text[0] === '_') test = true;
+    // if (text[0] === '*') test = true;
 
-    if (test) {
+    let test = hasLineBreak(text);
+
+    if (!test) {
         return {
             category: 'listText',
             type,
