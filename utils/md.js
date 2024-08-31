@@ -397,7 +397,7 @@ function handleImage (lines, index, beginning) {
             inc: 1
         }
     }
-    const lineStartsWithFullImage = lineStartsWithImageRegex(text);
+    const lineStartsWithFullImage = lineStartsWithImageRegex.test(text);
     if (lineStartsWithFullImage) {
         return {
             category: 'paragraph',
