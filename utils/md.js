@@ -767,7 +767,9 @@ function getCategory (lines, index) {
             break;
         case '>':
             // be sure to handle nested block quotes https://commonmark.org/help/tutorial/05-blockquotes.html
-            return handleBlockquote(lines, index, beginning);
+            let cat = handleBlockquote(lines, index, beginning);
+            if (cat.category === 'undefined') return handleParagraph(lines, index, true);
+            return cat;
             break;
         case '[':
             return handleLink(lines, index, beginning);

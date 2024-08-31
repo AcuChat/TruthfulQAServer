@@ -136,4 +136,5 @@ const test = async (testUrl = false) => {
 //processContent();
 //mdToJson(100);
 
-test('https://en.wikipedia.org/wiki/Apollo_11');
+test();
+//test('https://en.wikipedia.org/wiki/Apollo_11');
