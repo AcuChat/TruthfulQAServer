@@ -614,6 +614,7 @@ function handleBlockquote (lines, index, beginning) {
     }
 
     const contentBeginning = parseBeginning(content);
+    console.log('contentBeginning', contentBeginning);
     
     if (orderedListRegex.test(contentBeginning.string)) return handleBlockquoteOrderedList(lines, index, beginning, contentBeginning);
     if (markdownTextRegex.test(contentBeginning.string)) return handleBlockquoteParagraph(lines, index, beginning, contentBeginning);

@@ -8,6 +8,8 @@ const services = require('./utils/services');
 const wikipedia = require('./utils/wikipedia');
 const steps = require('./utils/steps');
 
+const fs = require ('fs');
+
 function extractWikipediaUrl(text) {
     // Define the regex pattern for Wikipedia URLs
     const pattern = /https?:\/\/(?:\w+\.)?wikipedia\.org\/[^\s]+/;
@@ -105,7 +107,8 @@ const mdToJson = async (num) => {
 const test = async () => {
     const wikiUrls = await sql.query(`select url from content`);
     for (let i = 0; i < wikiUrls.length; ++i) {
-        console.log('THE URL', wikiUrls[i].url)
+        console.log('THE URL', wikiUrls[i].url);
+        fs.writeFileSync('/home/tmp/urls.txt', wikiUrls[i].url + '\n', 'utf-8');
         const article = await wikipedia.getArticleUrlViaCheerio(wikiUrls[i].url);
         const md = html.htmlToMarkdownViaTurndown(article);
         await sql.query(`UPDATE content SET md = ${sql.escape(md)} WHERE url = ${sql.escape(wikiUrls[i].url)}`);
