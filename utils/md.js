@@ -7,8 +7,8 @@ const listItemLinkDepthRegex = /^(\s*)([*+-])\s+(\[)/;
 // Regular expression to match a markdown link
 //const linkRegex = /^(\s*)\[([^\]]*(?:\[[^\]]*\][^\]]*)*)\]\(([^)]+)\)$/; // allows for spaces prior to the beginning of the link
 //const linkRegex = /^(\s*)(!?\[(?:[^\[\]]|\[[^\[\]]*\])*\])(\((?:[^()]|\([^()]*\))*\))(\s*)$/;
-const linkRegex = /^(\s*)(!?\[(?:[^\[\]]|\[[^\[\]]*\])*\])(\((?:[^()]|\([^()]*(?:\([^()]*\)[^()]*)*\))*\))(\s*)$/;
-
+//const linkRegex = /^(\s*)(!?\[(?:[^\[\]]|\[[^\[\]]*\])*\])(\((?:[^()]|\([^()]*(?:\([^()]*\)[^()]*)*\))*\))(\s*)$/;
+const linkRegex = /^(\s*)(!?\[(?:[^\[\]]|\[[^\[\]]*\]|\[\[[^\[\]]*\]\])*\])(\((?:[^()]|\([^()]*(?:\([^()]*\)[^()]*)*\))*\))(\s*)$/
 const letterRegex = /^\s*[a-zA-Z]/;
 const beginningRegex = /\S+/;
 const startsWithLetterOrBackslashRegex = /^[a-zA-Z\\]/;
@@ -307,7 +307,7 @@ function getTextLines (lines, index) {
     return { count, textLines };
 }
 
-function handleParagraph (lines, index, beginning) {
+function handleParagraph (lines, index, undefined = false) {
     console.log('\n\nhandleParagraph');
     /*
             Look for line breaks: https://commonmark.org/help/tutorial/03-paragraphs.html
@@ -319,7 +319,7 @@ function handleParagraph (lines, index, beginning) {
     const { count, textLines } = getTextLines(lines, index);
     
     return {
-        category: 'paragraph', // paragraph
+        category: undefined ? 'unknown' : 'paragraph', // paragraph
         inc: count,
         raw: textLines.join('')
     }
@@ -760,6 +760,8 @@ function getCategory (lines, index) {
         case '|':
             // handle table here
             break;
+        default:
+            return handleParagraph(lines, index, true);
         
     }
 
@@ -798,7 +800,7 @@ exports.mdToAcuJson = async (md) => {
 
         console.log('category', category);
 
-        if (category.category === 'undefined') {
+        if (category.category === 'undefined' || category === 'unknown') {
             console.log("CATEGORY ERROR: ", mdLines[index]);
             const beginning = parseBeginning(mdLines[index]);
             console.log('Beginning: ', beginning);
