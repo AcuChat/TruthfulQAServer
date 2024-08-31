@@ -22,6 +22,8 @@ const stringStartsWithLinkRegex = /^\[(?:[^\[\]]|\[[^\[\]]*\])*\](?:\(.*?\)|\[.*
 const previousLineIsHeadingRegex = /^\s*={2,}$/;
 const previousLineIsSubheadingRegex = /^\s*-{2,}$/;
 const entireLineIsImageRegex = /^!\[([^\]]*)\]\(([^\s\)]+)(?:\s+"([^"]*)")?\)$/;
+const lineStartsWithImageRegex = /^!\[([^\]]*)\]\(([^\s\)]+)(?:\s+"([^"]*)")?\)/;
+
 const headingTextRegex = /^\s*#+\s+(.+)$/;
 const blockquoteRegex = /^((?:>\s*)+)(.*)$/;
 const generalLinkRegex = /(!?\[(?:[^\[\]]|\[[^\[\]]*\])*\])(\((?:[^()]|\([^()]*(?:\([^()]*\)[^()]*)*\))*\))/;
@@ -395,6 +397,15 @@ function handleImage (lines, index, beginning) {
             inc: 1
         }
     }
+    const lineStartsWithFullImage = lineStartsWithImageRegex(text);
+    if (lineStartsWithFullImage) {
+        return {
+            category: 'paragraph',
+            raw: lines[index],
+            inc: 1
+        }
+    }
+
     return {
         category: 'undefined',
         inc:1
