@@ -746,44 +746,52 @@ function getCategory (lines, index) {
     let cat;
     switch (beginning.init) {
         case '#':
-            return handleHeading(lines, index, beginning);
+            ca = handleHeading(lines, index, beginning);
+            break;
         case '-':
         case '+':
             // undordered list
-            return handleUnorderedList(lines, index, beginning);
+            ca = handleUnorderedList(lines, index, beginning);
+            break;
         case '*':
             // if entire line starts with * followed by space then unordered list
-            if (beginning.string === '*') return handleUnorderedList(lines, index, beginning);
+            if (beginning.string === '*') {
+                ca = handleUnorderedList(lines, index, beginning);
+            } else {
+                ca = handleParagraph(lines, index, beginning);
+            }
             // otherwise it is bold or italic meaning paragraph
-            return handleParagraph(lines, index, beginning);    
+            break;     
         case '(':        
         case '_':
             // can be bold or italic
-            return handleParagraph(lines, index, beginning)
+            ca =  handleParagraph(lines, index, beginning)
+            break;
         case '`':
             // inline code `
-            if (beginning.next != '`') return handleParagraph(lines, index, beginning);
+            if (beginning.next != '`') {
+                ca = handleParagraph(lines, index, beginning);
+            }
             // code block ```
             break;
         case '>':
             // be sure to handle nested block quotes https://commonmark.org/help/tutorial/05-blockquotes.html
-            cat = handleBlockquote(lines, index, beginning);
-            if (cat.category === 'undefined') return handleParagraph(lines, index, true);
-            return cat;
+            ca = handleBlockquote(lines, index, beginning);
             break;
         case '[':
-            cat =  handleLink(lines, index, beginning);
-            if (cat.category === 'undefined') return handleParagraph(lines, index, true);
-            return cat;
+            ca =  handleLink(lines, index, beginning);
+            break;
         case '!':
-            return handleImage(lines, index, beginning);
+            ca = handleImage(lines, index, beginning);
+            break;
         case '|':
             // handle table here
-            break;
+            
         default:
-            return handleParagraph(lines, index, true);
-        
+            ca = handleParagraph(lines, index, true);
     }
+    if (ca.category === 'undefined' || !ca) return handleParagraph(lines, index, true);
+    return ca;
 
     return {
         category: 'undefined',

@@ -136,5 +136,5 @@ const test = async (testUrl = false) => {
 //processContent();
 //mdToJson(100);
 
-//test();
-test('https://en.wikipedia.org/wiki/Evolution');
+test();
+//test('https://en.wikipedia.org/wiki/Evolution');
