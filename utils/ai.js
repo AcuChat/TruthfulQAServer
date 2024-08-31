@@ -64,7 +64,7 @@ exports.openAIGenericChatCompletion = async (userId, apiKey, model, messages, te
         }
     }
 
-    //console.log('openAIRequest', request);
+    console.log('openAIRequest', request.data.messages);
 
     if (max_tokens !== null) request.data.max_tokens = max_tokens;
     if (temperature !== null) request.data.temperature = temperature;
@@ -114,10 +114,10 @@ exports.openAIGenericChatCompletion = async (userId, apiKey, model, messages, te
     //const remainingTokens = await redis.chargeUser(userId, totalTokens, model);
     //console.log('remaining tokens, usage', remainingTokens, response.usage);
 
-    if (remainingTokens < 0) {
-        response.status = 'error';
-        response.message = 'out of tokens'
-    }
+    // if (remainingTokens < 0) {
+    //     response.status = 'error';
+    //     response.message = 'out of tokens'
+    // }
 
     return response;
 }

@@ -566,8 +566,7 @@ function parseBlockQuote(line) {
 function handleBlockquote (lines, index, beginning) {
     console.log('\n\nhandleBlockquote');
     const { depth, content} = parseBlockQuote(lines[index]);
-    console.log('depth', depth);
-    console.log('content', content);
+   
 
     if (!content) {
         return {
@@ -578,8 +577,7 @@ function handleBlockquote (lines, index, beginning) {
     }
 
     const contentBeginning = parseBeginning(content);
-    console.log('contentBeginning', contentBeginning);
-
+    
     if (orderedListRegex.test(contentBeginning.string)) return handleBlockquoteOrderedList(lines, index, beginning, contentBeginning);
     if (markdownTextRegex.test(contentBeginning.string)) return handleBlockquoteParagraph(lines, index, beginning, contentBeginning);
 
@@ -610,14 +608,10 @@ function handleBlockquote (lines, index, beginning) {
         }
     }
 
-    console.log(`switch [${contentBeginning.init}]`, contentBeginning.init, contentBeginning);
-
     switch (contentBeginning.init) {
         case '-':
-            console.log("HERE HERE")
         case '+':
             // undordered list
-            console.log("HERE")
             return handleBlockquoteUnorderedList(lines, index, beginning, contentBeginning);
     }
     return {
@@ -707,7 +701,6 @@ function getCategory (lines, index) {
         }
     }
 
-    console.log('switch', beginning.init, beginning);
 
     switch (beginning.init) {
         case '#':

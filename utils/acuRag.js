@@ -28,10 +28,8 @@ const extractLinkText = lines => {
         const { raw } = line;
         //let test = mdUtil.containsMarkdownLinks(raw);
         const parts = mdUtil.parseMarkdownLinks(raw);
-        console.log('parts', parts)
         line.linkText = parts.plaintext;
         line.links = parts.links;
-        console.log(line);
         // if (test) {
         //     console.log("FOUND LINK");
         //     console.log(raw);
@@ -52,9 +50,6 @@ const extractImageText = lines => {
             linkText = linkText.replace(line.images[j].fullText, line.images[j].alt);
         }
         line.imgText = linkText;
-        if (line.images.length) {
-            console.log(line);
-        }
     }
 }
 
@@ -79,7 +74,6 @@ const extractMarkdownFormatting = lines => {
             citText = citText.replace(line.formatting[j].fullText, line.formatting[j].plainText)
         }
         line.formText = citText;
-        if (line.formatting.length) console.log('EHLO', line);
     }
 }
 
@@ -229,3 +223,25 @@ exports.getSentences = async (lines, max = 20) => {
     return;
 }
 
+exports.paragraphChunks = (paragraphs, maxChars = 1000) => {
+    const chunks = [];
+    let index = 0;
+    let length = 0;
+    let chunk = [];
+
+    for (let i = 0; i < paragraphs.length; ++i) {
+        const test = length + paragraphs[i].length;
+        console.log(test);
+        if (test <= maxChars) {
+            length = test;
+            chunk.push(paragraphs[i]);
+        } else {
+            console.log(chunk.join("\n"));
+            chunks.push(chunk.join("\n"));
+            chunk.push(paragraphs[i]);
+            length = paragraphs[i].length;
+        }
+    }
+    if (chunk.length) chunks.push(chunk.join("\n"));
+    return chunks;
+}

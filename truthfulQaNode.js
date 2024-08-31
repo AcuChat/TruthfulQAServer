@@ -104,17 +104,34 @@ const mdToJson = async (num) => {
 
 const test = async () => {
     const wikiUrls = await sql.query(`select url from content limit 10`);
-    const article = await wikipedia.getArticleUrlViaCheerio(wikiUrls[0].url);
-    const md = html.htmlToMarkdownViaTurndown(article);
-    console.log('article',article);
-    console.log('md', md);
-
-    const lines = await acuRag.getLines(md);
-    console.log('\n\n\nline', lines[0], lines[1], lines[2]);
-    await acuRag.getSentences(lines);
-    const paragraphs = lines.map(line => line.sentences.join(" "));
-    console.log(paragraphs);
-    const result = await steps.simplifyRoutes(paragraphs.join("\n"));
+    for (let i = 0; i < wikiUrls.length; ++i) {
+        console.log(wikiUrls[i].url)
+        const article = await wikipedia.getArticleUrlViaCheerio(wikiUrls[i].url);
+        const md = html.htmlToMarkdownViaTurndown(article);
+        await sql.query(`UPDATE content SET md = ${sql.escape(md)} WHERE url = ${sql.escape(wikiUrls[i])}`);
+        const lines = await acuRag.getLines(md);
+        await acuRag.getSentences(lines);
+        await sql.query(
+            'UPDATE content SET json = ? WHERE url = ?',
+            [JSON.stringify(lines), wikiUrls[i]],
+            (error, results) => {
+              if (error) {
+                console.error('Error updating record:', error);
+              } else {
+                console.log('Record updated successfully');
+              }
+            }
+          );
+    }
+    
+    
+    //const paragraphs = lines.map(line => line.sentences.join(" "));
+    //console.log(paragraphs);
+    //const paragraphChunks = acuRag.paragraphChunks(paragraphs);
+    //console.log(paragraphChunks);
+    //console.log(paragraphChunks.length);
+    //const result = await steps.simplifyRoutes(paragraphChunks);
+    //console.log(result);
 }
 
 //storeWikiHtml();
