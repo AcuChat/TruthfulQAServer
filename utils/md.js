@@ -621,6 +621,7 @@ function handleBlockquote (lines, index, beginning) {
     
     if (orderedListRegex.test(contentBeginning.string)) return handleBlockquoteOrderedList(lines, index, beginning, contentBeginning);
     if (markdownTextRegex.test(contentBeginning.string)) return handleBlockquoteParagraph(lines, index, beginning, contentBeginning);
+    if (content.startsWith('**')) return handleBlockquoteParagraph(lines, index, beginning, contentBeginning);
 
     if (contentBeginning.init === '-') {
         if (previousLineIsSubheadingRegex.test(lines[index])) {
