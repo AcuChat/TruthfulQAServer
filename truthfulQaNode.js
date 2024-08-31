@@ -104,8 +104,11 @@ const mdToJson = async (num) => {
     }
 }
 
-const test = async () => {
-    const wikiUrls = await sql.query(`select url from content`);
+const test = async (testUrl = false) => {
+    const q = testUrl ? 
+        `SELECT url FROM content WHERE url = '${testUrl}'` :
+        `select url from content`
+    const wikiUrls = await sql.query(q);
     for (let i = 0; i < wikiUrls.length; ++i) {
         console.log('THE URL', wikiUrls[i].url);
         fs.writeFileSync('/home/tmp/urls.txt', wikiUrls[i].url + '\n', 'utf-8');
@@ -133,4 +136,4 @@ const test = async () => {
 //processContent();
 //mdToJson(100);
 
-test();
+test('https://en.wikipedia.org/wiki/Alternative_medicine');

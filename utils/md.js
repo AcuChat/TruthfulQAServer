@@ -603,7 +603,7 @@ function parseBlockQuote(line) {
 function handleBlockquote (lines, index, beginning) {
     console.log('\n\nhandleBlockquote');
     const { depth, content} = parseBlockQuote(lines[index]);
-   
+    console.log('content', content);
 
     if (!content) {
         return {
