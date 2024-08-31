@@ -330,7 +330,7 @@ function handleParagraph (lines, index, undefined = false) {
 
 
 
-function handleLink (lines, index, beginning, maxLines=5) {
+function handleLink (lines, index, beginning, maxLines=10) {
     console.log('\n\nhandleLink')
     const depth = Math.floor(beginning.startingWhitespace / 4);
     let text = lines[index].substring(beginning.startingWhitespace);
