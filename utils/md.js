@@ -25,7 +25,8 @@ const entireLineIsImageRegex = /^!\[([^\]]*)\]\(([^\s\)]+)(?:\s+"([^"]*)")?\)$/;
 const lineStartsWithImageRegex = /^!\[([^\]]*)\]\(([^\s\)]+)(?:\s+"([^"]*)")?\)/;
 
 const headingTextRegex = /^\s*#+\s+(.+)$/;
-const blockquoteRegex = /^((?:>\s*)+)(.*)$/;
+//const blockquoteRegex = /^((?:>\s*)+)(.*)$/;
+const blockquoteRegex = /^\s*((?:>\s*)+)(.*)$/;
 const generalLinkRegex = /(!?\[(?:[^\[\]]|\[[^\[\]]*\])*\])(\((?:[^()]|\([^()]*(?:\([^()]*\)[^()]*)*\))*\))/;
 
 function hasLineBreak(markdownLine) {
@@ -588,10 +589,12 @@ function handleHeading (lines, index, beginning) {
 
 
 function parseBlockQuote(line) {
+    console.log('parseBlockQuote');
     const regex = blockquoteRegex;
     const match = line.match(regex);
 
     if (match) {
+        console.log('parseBlockQuote match')
         const quoteMarkers = match[1].replace(/[^>]/g, '');
         const quoteDepth = quoteMarkers.length;
         const content = match[2].trim();
