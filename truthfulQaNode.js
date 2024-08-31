@@ -103,9 +103,9 @@ const mdToJson = async (num) => {
 }
 
 const test = async () => {
-    const wikiUrls = await sql.query(`select url from content limit 10`);
+    const wikiUrls = await sql.query(`select url from content`);
     for (let i = 0; i < wikiUrls.length; ++i) {
-        console.log(wikiUrls[i].url)
+        console.log('THE URL', wikiUrls[i].url)
         const article = await wikipedia.getArticleUrlViaCheerio(wikiUrls[i].url);
         const md = html.htmlToMarkdownViaTurndown(article);
         await sql.query(`UPDATE content SET md = ${sql.escape(md)} WHERE url = ${sql.escape(wikiUrls[i].url)}`);
