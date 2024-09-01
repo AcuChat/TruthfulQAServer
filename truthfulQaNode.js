@@ -133,16 +133,33 @@ const getSentencesFromUrl = async (testUrl = false) => {
     //console.log(result);
 }
 
+const createSourceTable = async id => {
+    const q = `CREATE TABLE IF NOT EXISTS source_${id} (
+        num BIGINT PRIMARY KEY,
+        line MEDIUMTEXT
+    )`;
+    
+    const r = await sql.query(q);
+
+    return r;
+}
+
 const test = async () => {
-    let response = await sql.query(`SELECT url FROM content`);
+    let response = await sql.query(`SELECT id, url FROM content`);
     for (let i = 0; i < response.length; ++i) {
-        let id = uuidv4();
-        id = id.replaceAll('-', '');
-        await sql.query(`UPDATE content SET id = '${id}' WHERE url = '${response[i].url}'`);
+        const { id, url } = response[i];
+        await createSourceTable(id);
+        const info = await sql.query(`SELECT json FROM content WHERE id = '${id}'`);
+        const lines = JSON.parse(info[0].json);
+        for (let j = 0; j < lines.length; ++j) {
+            await sql.query(`INSERT INTO source_${id} (num, line) VALUES (${j}, ${sql.escape(JSON.stringify(lines[j]))})`);
+        }
+        console.log(id, url);
     }
     
-    response = await sql.query(`SELECT id, url FROM content`);
-    console.log(response);
+    console.log(`source_${response[0].id}`);
+    //response = await sql.query(`SELECT id, url FROM content`);
+    //console.log(response);
 }
 
 //storeWikiHtml();

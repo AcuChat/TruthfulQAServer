@@ -30,8 +30,10 @@ const mysqlOptions = {
   exports.query = q => {
     return new Promise((resolve, reject) => {
       this.pool.query(q, function(err, rows, fields) {
-        console.error(err);
-        if (err) return resolve(false);
+        if (err) {
+            console.error(err);
+            return resolve(false);
+        }
         resolve(rows)
       });
     })
