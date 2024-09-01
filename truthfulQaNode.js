@@ -104,7 +104,7 @@ const mdToJson = async (num) => {
     }
 }
 
-const test = async (testUrl = false) => {
+const getSentencesFromUrl = async (testUrl = false) => {
     const q = testUrl ? 
         `SELECT url FROM content WHERE url = '${testUrl}'` :
         `select url from content`
@@ -129,6 +129,11 @@ const test = async (testUrl = false) => {
     //console.log(paragraphChunks.length);
     //const result = await steps.simplifyRoutes(paragraphChunks);
     //console.log(result);
+}
+
+const test = async () => {
+    const response = await sql.query(`SELECT url FROM content`);
+    console.log(response);
 }
 
 //storeWikiHtml();
