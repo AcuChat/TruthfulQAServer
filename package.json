@@ -19,6 +19,7 @@
     "mysql2": "^3.11.0",
     "node-readability": "^3.0.0",
     "openai-gpt-token-counter": "^1.1.1",
-    "turndown": "^7.2.0"
+    "turndown": "^7.2.0",
+    "uuid": "^10.0.0"
   }
 }

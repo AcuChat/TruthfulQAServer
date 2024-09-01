@@ -10,6 +10,8 @@ const steps = require('./utils/steps');
 
 const fs = require ('fs');
 
+const { v4: uuidv4 } = require('uuid');
+
 function extractWikipediaUrl(text) {
     // Define the regex pattern for Wikipedia URLs
     const pattern = /https?:\/\/(?:\w+\.)?wikipedia\.org\/[^\s]+/;
@@ -132,7 +134,14 @@ const getSentencesFromUrl = async (testUrl = false) => {
 }
 
 const test = async () => {
-    const response = await sql.query(`SELECT url FROM content`);
+    let response = await sql.query(`SELECT url FROM content`);
+    for (let i = 0; i < response.length; ++i) {
+        let id = uuidv4();
+        id = id.replaceAll('-', '');
+        await sql.query(`UPDATE content SET id = '${id}' WHERE url = '${response[i].url}'`);
+    }
+    
+    response = await sql.query(`SELECT id, url FROM content`);
     console.log(response);
 }
 
