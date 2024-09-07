@@ -143,5 +143,11 @@ exports.questions = async () => {
     return questions;
 }
 
+exports.urlId = async (url) => {
+    const response = await exports.query(`SELECT id FROM content WHERE url = ${exports.escape(url)}`);
+    if (!response.length) return '';
+    return response[0].id;
+}
+
 //createTables();
 //initializeTable();
