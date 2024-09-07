@@ -180,8 +180,8 @@ const storeChunks = async (id, lines) => {
     let response = await qdrant.createOpenAICollection(id, true);
     console.log(response);
 
-    // await storeChunk(id, lines, 5, 3);
-    // await storeChunk(id, lines, 3, 2);
+    await storeChunk(id, lines, 5, 3);
+    await storeChunk(id, lines, 3, 2);
     await storeChunk(id, lines, 1, 1);
 }
 

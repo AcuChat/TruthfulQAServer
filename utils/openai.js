@@ -1,7 +1,9 @@
 // OpenAI Migration Guide: https://chat.openai.com/share/b175130a-0d77-465e-8187-59b92590df8b
-
+require('dotenv').config();
 const { Configuration, OpenAIApi } = require("openai");
 const {OpenAI }  = require("openai");
+
+const { OPEN_AI_KEY } = process.env;
 
 exports.getEmbedding = async (openAiKey, input) => {
     //console.log('getEmbedding openAIKey', openAiKey)
@@ -24,22 +26,33 @@ exports.getEmbedding = async (openAiKey, input) => {
       return embeddingResponse.data[0].embedding;
 }
 
-exports.getEmbeddings = async (openAiKey, inputs) => {
+exports.getEmbeddings = async (inputs) => {
 
   const openai = new OpenAI({
-      apiKey: openAiKey
+      apiKey: OPEN_AI_KEY
   });
 
   let embeddingResponse;
   try {
-      embeddingResponse = await openai.embeddings.create({
-          model: 'text-embedding-ada-002',
-          input: inputs,
-      });
-  } catch (err) {
-      console.error('OpenAI API error:', err.response && err.response.data ? err.response.data : err);
-      return false;
-  }
+    const embeddingResponse = await openai.embeddings.create({
+        model: 'text-embedding-ada-002',
+        input: inputs,
+    });
+
+    // Extract and return an array of embeddings
+    return embeddingResponse.data.map(item => item.embedding);
+
+    } catch (error) {
+        console.error('OpenAI API error:', error);
+
+        if (error.response) {
+            console.error('Status:', error.response.status);
+            console.error('Data:', error.response.data);
+        }
+
+        // Throw the error to be handled by the caller
+        throw error;
+    }
 
   // Extract and return an array of embeddings
   return embeddingResponse.data.map(item => item.embedding);
