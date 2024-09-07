@@ -7,6 +7,7 @@ const acuRag = require('./utils/acuRag');
 const services = require('./utils/services');
 const wikipedia = require('./utils/wikipedia');
 const steps = require('./utils/steps');
+const qdrant = require('./utils/qdrant');
 
 const fs = require ('fs');
 
@@ -162,6 +163,10 @@ const test = async () => {
     //console.log(response);
 }
 
+const createCollection = async (id) => {
+    console.log('createCollection', id);
+}
+
 const qa = async () => {
     //console.log('hello qa');
 
@@ -176,7 +181,13 @@ const qa = async () => {
         console.log(questions[i]);
         console.log('id', id);
         
+        const info = await qdrant.collectionInfo(id);
+        let collectionExists = true;
+        if (info?.status?.error) collectionExists = false;
 
+        if (!collectionExists) await (createCollection(id));
+
+        
 
         
         break;
