@@ -167,7 +167,20 @@ const qa = async () => {
 
     // get questions
     const questions = await sql.questions();
-    console.log(questions[0]);
+    for (let i = 0; i < questions.length; ++i) {
+        const id = await sql.urlId(questions[i].source);
+        
+        // skip over non-wikipedia sources
+        if (!id) continue;
+        
+        console.log(questions[i]);
+        console.log('id', id);
+        
+
+
+        
+        break;
+    }
 }
 
 //storeWikiHtml();
