@@ -165,12 +165,13 @@ const test = async () => {
 
 const storeChunk = async (id, lines, numLines, slidingWindow) => {
     let index = 0;
+    console.log("storeChunk")
     while (index < lines.length) {
         const chunk = lines.slice(index, index + numLines).join("\n");
         let response = await qdrant.catOpenAIPoint(id, uuidv4(), chunk, {ranges:[`${index}-${index+numLines-1}`]});
         index += slidingWindow;
-        console.log(index);
     }
+    console.log("Chunks are stored")
 }
 
 const storeChunks = async (id, lines) => {
@@ -179,8 +180,9 @@ const storeChunks = async (id, lines) => {
     let response = await qdrant.createOpenAICollection(id, true);
     console.log(response);
 
-    await storeChunk(id, lines, 5, 3);
-
+    // await storeChunk(id, lines, 5, 3);
+    // await storeChunk(id, lines, 3, 2);
+    await storeChunk(id, lines, 1, 1);
 }
 
 const createCollection = async (id) => {
@@ -226,9 +228,6 @@ const qa = async () => {
 
         if (!collectionExists) await (createCollection(id));
 
-        
-
-        
         break;
     }
 }

@@ -23,3 +23,24 @@ exports.getEmbedding = async (openAiKey, input) => {
       
       return embeddingResponse.data[0].embedding;
 }
+
+exports.getEmbeddings = async (openAiKey, inputs) => {
+
+  const openai = new OpenAI({
+      apiKey: openAiKey
+  });
+
+  let embeddingResponse;
+  try {
+      embeddingResponse = await openai.embeddings.create({
+          model: 'text-embedding-ada-002',
+          input: inputs,
+      });
+  } catch (err) {
+      console.error('OpenAI API error:', err.response && err.response.data ? err.response.data : err);
+      return false;
+  }
+
+  // Extract and return an array of embeddings
+  return embeddingResponse.data.map(item => item.embedding);
+}

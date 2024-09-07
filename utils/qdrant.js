@@ -220,10 +220,14 @@ exports.catPoint = async (collectionName, point) => {
     //console.log('addPoint', host, port, collectionName, point);
 
     const result = await exports.getRanges(collectionName, point.vector);
-    if (result.length) console.log('RANGES', result);
-    
+    if (result.length) {
+        point.payload.ranges = [...point.payload.ranges, ...result];
+        point.payload.ranges = [...new Set(point.payload.ranges)]
+        console.log("NEW RANGES", point);
+    }
+
     const request = {
-        url: `http://127.0.0.1:6333/collections/${collectionName}/points`,
+        url: `http://127.0.0.1:6333/collections/${collectionName}/points?wait=true&upsert=true`,
         method: 'put',
         headers: {
             'Content-Type': 'application/json;charset=UTF-8',
