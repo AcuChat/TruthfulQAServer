@@ -166,7 +166,7 @@ const qa = async () => {
     //console.log('hello qa');
 
     // get questions
-    const questions = await sql.query(`SELECT id, question, source from questions`);
+    const questions = await sql.questions();
     console.log(questions[0]);
 }
 

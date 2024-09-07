@@ -138,5 +138,10 @@ exports.addIdUrl = async (id, url) => {
     return r;
 }
 
+exports.questions = async () => {
+    const questions = await exports.query(`SELECT id, question, source from questions`);
+    return questions;
+}
+
 //createTables();
 //initializeTable();
