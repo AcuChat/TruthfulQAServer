@@ -7,6 +7,8 @@ const { Configuration, OpenAIApi } = require("openai");
 const { v4: uuidv4 } = require('uuid');
 const openai = require('./openai');
 
+const { OPEN_AI_KEY } = process.env;
+
 const contentIdFilter = (contentId) => {
     return {
         filter: {
@@ -84,7 +86,7 @@ exports.createCollection = async (collectionName, size, onDiskPayload = false, d
     }
 }
 
-exports.createOpenAICollection = async (collectionName, diskBased = false) => {
+exports.createOpenAICollection = async (collectionName, diskBased = true) => {
     return await this.createCollection(collectionName, 1536, diskBased);
 }
 
@@ -112,7 +114,7 @@ exports.deleteCollection = async (collectionName) => {
     return response.data;
 }
 
-exports.addPoint = async (collectionName, point) => {
+exports.addPoint = async (collectionName, point, upsert = true) => {
     //console.log('addPoint', host, port, collectionName, point);
 
     const { id, vector, payload } = point;
@@ -152,7 +154,7 @@ exports.addPoint = async (collectionName, point) => {
     return axios(request);
 }
 
-exports.addOpenAIPoint = async (openAiKey, collectionName, pointId, content, payload = false) => {
+exports.addOpenAIPoint = async (openAiKey, collectionName, pointId, content, payload = false, upsert = true) => {
     console.log('qdrant addOpenAIPoint content', content);
     let vector = await openai.getEmbedding(openAiKey, content);
 
@@ -166,14 +168,16 @@ exports.addOpenAIPoint = async (openAiKey, collectionName, pointId, content, pay
                 id: pointId, 
                 vector, 
                 payload
-            }
+            },
+            upsert
         );
     } else {
         await this.addPoint(collectionName, 
             {
                 id: pointId, 
                 vector, 
-            }
+            },
+            upsert
         );
     }
 

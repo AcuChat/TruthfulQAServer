@@ -163,8 +163,40 @@ const test = async () => {
     //console.log(response);
 }
 
+const storeChunk = async (id, lines, numLines, slidingWindow) => {
+    const index = 0;
+    while (index < lines.length) {
+        const chunk = lines.slice(index, index + numLines).join("\n");
+        console.log(chunk);
+        break;
+
+        index += slidingWindow;
+    }
+}
+
+const storeChunks = async (id, lines) => {
+    console.log('storeChunks', lines.length)
+
+    await storeChunk(id, lines, 5, 3);
+
+}
+
 const createCollection = async (id) => {
     console.log('createCollection', id);
+
+    try {
+        const result = await sql.query(`SELECT line FROM source_${id}`);
+        const lines = [];
+        for (let i = 0; i < result.length; ++i) {
+            const obj = JSON.parse(result[i].line);
+            lines.push(obj.plainText);
+        }
+        await storeChunks(id, lines)
+    } catch(err) {
+        console.error(err);
+    }
+
+
 }
 
 const qa = async () => {
