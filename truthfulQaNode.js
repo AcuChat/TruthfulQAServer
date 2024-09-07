@@ -163,7 +163,11 @@ const test = async () => {
 }
 
 const qa = async () => {
-    console.log('hello qa');
+    //console.log('hello qa');
+
+    // get questions
+    const questions = await sql.query(`SELECT id, question, source from questions`);
+    console.log(questions[0]);
 }
 
 //storeWikiHtml();
