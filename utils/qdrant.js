@@ -34,7 +34,8 @@ exports.getOpenAIContexts = async (collectionName, query, limit = 3) => {
         },
         data: {
             vector,
-            limit
+            limit,
+            with_payload: true
         }
     }
 
@@ -223,7 +224,7 @@ exports.catPoint = async (collectionName, point) => {
     if (result.length) {
         point.payload.ranges = [...point.payload.ranges, ...result];
         point.payload.ranges = [...new Set(point.payload.ranges)]
-        console.log("NEW RANGES", point);
+        //console.log("NEW RANGES", point);
     }
 
     const request = {

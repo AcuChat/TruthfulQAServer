@@ -163,11 +163,13 @@ const test = async () => {
     //console.log(response);
 }
 
-const storeChunk = async (id, lines, numLines, slidingWindow) => {
+const storeChunk = async (id, lines, numLines, slidingWindow, threshold=500) => {
+
     let index = 0;
-    console.log("storeChunk")
+    
     while (index < lines.length) {
         const chunk = lines.slice(index, index + numLines).join("\n");
+        console.log("storeChunk", index, numLines, slidingWindow);
         let response = await qdrant.catOpenAIPoint(id, uuidv4(), chunk, {ranges:[`${index}-${index+numLines-1}`]});
         index += slidingWindow;
     }
@@ -180,9 +182,10 @@ const storeChunks = async (id, lines) => {
     let response = await qdrant.createOpenAICollection(id, true);
     console.log(response);
 
-    await storeChunk(id, lines, 5, 3);
-    await storeChunk(id, lines, 3, 2);
-    await storeChunk(id, lines, 1, 1);
+    const promises = [];
+    promises.push(storeChunk(id, lines, 5, 3));
+    promises.push(storeChunk(id, lines, 3, 2));
+    promises.push(storeChunk(id, lines, 1, 1))
 }
 
 const createCollection = async (id) => {
@@ -220,13 +223,19 @@ const qa = async () => {
         /**
          * IMPORTANT: REMOVE 
          */ 
-        let temp = await qdrant.deleteCollection(id);
+        //let temp = await qdrant.deleteCollection(id);
 
         const info = await qdrant.collectionInfo(id);
         let collectionExists = true;
         if (info?.status?.error) collectionExists = false;
 
         if (!collectionExists) await (createCollection(id));
+
+        console.log("ready to query", id, questions[i]);
+
+        const ranges = await qdrant.getOpenAIContexts(id, questions[i].question, 20);
+
+        console.log('ranges', ranges);
 
         break;
     }
