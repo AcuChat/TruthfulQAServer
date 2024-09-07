@@ -164,16 +164,12 @@ const test = async () => {
 }
 
 const storeChunk = async (id, lines, numLines, slidingWindow) => {
-    const index = 0;
+    let index = 0;
     while (index < lines.length) {
         const chunk = lines.slice(index, index + numLines).join("\n");
-
-        let response = await qdrant.addOpenAIPoint(id, uuidv4(), chunk, {ranges:[`${index}-${index+numLines-1}`]});
-
-        console.log(chunk);
-        break;
-
+        let response = await qdrant.catOpenAIPoint(id, uuidv4(), chunk, {ranges:[`${index}-${index+numLines-1}`]});
         index += slidingWindow;
+        console.log(index);
     }
 }
 

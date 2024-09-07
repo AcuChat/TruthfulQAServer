@@ -4,7 +4,7 @@ const { Configuration, OpenAIApi } = require("openai");
 const {OpenAI }  = require("openai");
 
 exports.getEmbedding = async (openAiKey, input) => {
-    console.log('getEmbedding openAIKey', openAiKey)
+    //console.log('getEmbedding openAIKey', openAiKey)
     const openai = new OpenAI({
       apiKey: openAiKey // This is also the default, can be omitted
     });
@@ -19,7 +19,7 @@ exports.getEmbedding = async (openAiKey, input) => {
         return false;
       }
 
-      console.log(embeddingResponse.data[0].embedding)
+      //console.log(embeddingResponse.data[0].embedding)
       
       return embeddingResponse.data[0].embedding;
 }

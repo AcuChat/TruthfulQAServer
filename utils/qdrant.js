@@ -19,6 +19,73 @@ const contentIdFilter = (contentId) => {
     }
 }
 
+exports.getOpenAIContexts = async (collectionName, query, limit = 3) => {
+
+    const vector = await openai.getEmbedding(OPEN_AI_KEY, query);
+ 
+    console.log('vector.length', vector.length)
+
+    const request = {
+        url: `http://127.0.0.1:6333/collections/${collectionName}/points/search`,
+        method: 'post',
+        headers: {
+            'Content-Type': 'application/json;charset=UTF-8',
+            "Access-Control-Allow-Origin": "*",
+        },
+        data: {
+            vector,
+            limit
+        }
+    }
+
+    let response;
+
+    try {
+        response = await axios(request);
+        //console.log(response.data);
+        const results = response.data.result;
+        console.log('results', results);
+        const contextIds = [];
+        for (let i = 0; i < results.length; ++i) {
+            contextIds.push({id: results[i].id, payload: results[i].payload ? results[i].payload : {}});
+        }
+        return contextIds;
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
+}
+
+exports.getRanges = async (collectionName, vector, limit = 1) => {
+    const request = {
+        url: `http://127.0.0.1:6333/collections/${collectionName}/points/search`,
+        method: 'post',
+        headers: {
+            'Content-Type': 'application/json;charset=UTF-8',
+            "Access-Control-Allow-Origin": "*",
+        },
+        data: {
+            vector,
+            limit,
+            with_payload: true
+        }
+    }
+
+    let response;
+
+    try {
+        response = await axios(request);
+        //console.log(response.data);
+        const results = response.data.result;
+        if (!results.length) return [];
+
+        return results[0]?.score === 1 ? results[0]?.payload?.ranges : [];
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
+}
+
 exports.getContentPoints = async (collectionName, contentId) => {
     const request = {
         url: `http://127.0.0.1:6333/collections/${collectionName}/points/scroll`,
@@ -138,7 +205,41 @@ exports.addPoint = async (collectionName, point, upsert = true) => {
 
     try {
         const response = await axios(request);
-        console.log("qdrant.js addPoint(): axios response", response.data);
+        //console.log("qdrant.js addPoint(): axios response", response.data);
+        return response.data;
+    } catch (err) {
+        console.log('ERROR', Object.keys(err), err.message, err.response.data);
+        return false;
+    }
+    
+
+    return axios(request);
+}
+
+exports.catPoint = async (collectionName, point) => {
+    //console.log('addPoint', host, port, collectionName, point);
+
+    const result = await exports.getRanges(collectionName, point.vector);
+    if (result.length) console.log('RANGES', result);
+    
+    const request = {
+        url: `http://127.0.0.1:6333/collections/${collectionName}/points`,
+        method: 'put',
+        headers: {
+            'Content-Type': 'application/json;charset=UTF-8',
+            "Access-Control-Allow-Origin": "*",
+        },
+        data: {
+            points: [point]
+        }
+    }
+
+    //if (payload) request.data.points[0].payload = payload;
+    //console.log('request', JSON.stringify(request, null, 4));
+
+    try {
+        const response = await axios(request);
+        //console.log("qdrant.js addPoint(): axios response", response.data);
         return response.data;
     } catch (err) {
         console.log('ERROR', Object.keys(err), err.message, err.response.data);
@@ -150,10 +251,10 @@ exports.addPoint = async (collectionName, point, upsert = true) => {
 }
 
 exports.addOpenAIPoint = async (collectionName, pointId, content, payload = false, upsert = true) => {
-    console.log('qdrant addOpenAIPoint content', content);
+    //console.log('qdrant addOpenAIPoint content', content);
     let vector = await openai.getEmbedding(OPEN_AI_KEY, content);
 
-    console.log('Embedding Vector', vector.length);
+    //console.log('Embedding Vector', vector.length);
 
     if (vector === false) return false;
 
@@ -179,40 +280,24 @@ exports.addOpenAIPoint = async (collectionName, pointId, content, payload = fals
     return vector;
 }
 
-exports.getOpenAIContexts = async (openAIKey, collectionName, query, limit = 3) => {
+exports.catOpenAIPoint = async (collectionName, pointId, content, payload) => {
+    //console.log('qdrant addOpenAIPoint content', content);
+    let vector = await openai.getEmbedding(OPEN_AI_KEY, content);
 
-    const vector = await openai.getEmbedding(openAIKey, query);
- 
-    console.log('vector.length', vector.length)
+    //console.log('Embedding Vector', vector.length);
 
-    const request = {
-        url: `http://127.0.0.1:6333/collections/${collectionName}/points/search`,
-        method: 'post',
-        headers: {
-            'Content-Type': 'application/json;charset=UTF-8',
-            "Access-Control-Allow-Origin": "*",
-        },
-        data: {
-            vector,
-            limit,
-            "with_payload": true
+    if (vector === false) return false;
+
+    
+    await this.catPoint(collectionName, 
+        {
+            id: pointId, 
+            vector, 
+            payload
         }
-    }
+    );
+    
 
-    let response;
-
-    try {
-        response = await axios(request);
-        //console.log(response.data);
-        const results = response.data.result;
-        console.log('results', results);
-        const contextIds = [];
-        for (let i = 0; i < results.length; ++i) {
-            contextIds.push({id: results[i].id, payload: results[i].payload ? results[i].payload : {}});
-        }
-        return contextIds;
-    } catch (err) {
-        console.error(err);
-        return [];
-    }
+    return vector;
 }
+
