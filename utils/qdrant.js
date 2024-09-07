@@ -110,7 +110,7 @@ exports.deleteCollection = async (collectionName) => {
         method: 'DELETE'
     }
 
-    const response =  axios(request);
+    const response =  await axios(request);
     return response.data;
 }
 
@@ -129,12 +129,7 @@ exports.addPoint = async (collectionName, point, upsert = true) => {
             "Access-Control-Allow-Origin": "*",
         },
         data: {
-            points: [
-                {
-                    id, vector
-
-                }
-            ]
+            points: [point]
         }
     }
 
@@ -154,9 +149,9 @@ exports.addPoint = async (collectionName, point, upsert = true) => {
     return axios(request);
 }
 
-exports.addOpenAIPoint = async (openAiKey, collectionName, pointId, content, payload = false, upsert = true) => {
+exports.addOpenAIPoint = async (collectionName, pointId, content, payload = false, upsert = true) => {
     console.log('qdrant addOpenAIPoint content', content);
-    let vector = await openai.getEmbedding(openAiKey, content);
+    let vector = await openai.getEmbedding(OPEN_AI_KEY, content);
 
     console.log('Embedding Vector', vector.length);
 
