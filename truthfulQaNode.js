@@ -162,10 +162,17 @@ const test = async () => {
     //console.log(response);
 }
 
+const qa = async () => {
+    console.log('hello qa');
+}
+
 //storeWikiHtml();
 //sql.resetContent();
 //processContent();
 //mdToJson(100);
 
-test();
+//test();
 //test('https://en.wikipedia.org/wiki/Evolution');
+
+
+qa();
