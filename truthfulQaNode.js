@@ -167,6 +167,8 @@ const storeChunk = async (id, lines, numLines, slidingWindow) => {
     const index = 0;
     while (index < lines.length) {
         const chunk = lines.slice(index, index + numLines).join("\n");
+
+
         console.log(chunk);
         break;
 
@@ -176,6 +178,10 @@ const storeChunk = async (id, lines, numLines, slidingWindow) => {
 
 const storeChunks = async (id, lines) => {
     console.log('storeChunks', lines.length)
+    // create collection
+
+    let response = await qdrant.createOpenAICollection(id, true);
+    console.log(response);
 
     await storeChunk(id, lines, 5, 3);
 
