@@ -253,17 +253,28 @@ const questionsToChunks = async () => {
         const { id, ranges } = info;
         const table = `source_${id}`;
         console.log("Ranges", ranges);
+        const documents = [];
         for (let j = 0; j < ranges.length; ++j) {
             console.log('ranges[j]', ranges[j][0])
             const parts = ranges[j][0].split('-');
             const lines = await sql.query(`SELECT line FROM ${table} WHERE num >= ${parts[0]} AND num <= ${parts[1]}`);
+            const text = [];
             for (let k = 0; k < lines.length; ++k) {
                 //console.log('lines[k]', lines[k])
                 const line = JSON.parse(lines[k].line);
                 const { plainText } = line;
+                text.push(plainText);
                 console.log(plainText);
             }
+            documents.push({
+                id,
+                start: Number(parts[0]),
+                end: Number(parts[1]),
+                text: text.join("\n")
+            })
         }
+
+        console.log(query, documents);
         // get ranges
         // chunksFromRanges(id, ranges)
 
