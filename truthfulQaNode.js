@@ -242,11 +242,31 @@ const questionsToRanges = async () => {
 }
 
 const questionsToChunks = async () => {
-    const questions = await sql.questions();
-    for (let i = 0; i < questions.length; ++i) {
-        const { id, question, source } = questions[i];
+    const data = await sql.query(`SELECT query, result FROM test`);
+    for (let i = 0; i < data.length; ++i) {
+        const { query, result } = data[i];
+        console.log(query, result);
 
-        
+        const info = JSON.parse(result);
+        const { id, ranges } = info;
+        const table = `source_${id}`;
+        console.log("Ranges", ranges);
+        for (let j = 0; j < ranges.length; ++j) {
+            console.log('ranges[j]', ranges[j][0])
+            const parts = ranges[j][0].split('-');
+            const lines = await sql.query(`SELECT line FROM ${table} WHERE num >= ${parts[0]} AND num <= ${parts[1]}`);
+            for (let k = 0; k < lines.length; ++k) {
+                //console.log('lines[k]', lines[k])
+                const line = JSON.parse(lines[k].line);
+                const { plainText } = line;
+                console.log(plainText);
+            }
+        }
+        // get ranges
+        // chunksFromRanges(id, ranges)
+
+        // display chunks
+
         break;
     }
 }
