@@ -166,14 +166,13 @@ const test = async () => {
 const storeChunk = async (id, lines, numLines, slidingWindow, threshold=500) => {
 
     let index = 0;
-    
+    console.log("storeChunk", numLines, slidingWindow);
     while (index < lines.length) {
-        const chunk = lines.slice(index, index + numLines).join("\n");
-        console.log("storeChunk", index, numLines, slidingWindow);
+        const chunk = lines.slice(index, index + numLines).join("\n");      
         let response = await qdrant.catOpenAIPoint(id, uuidv4(), chunk, {ranges:[`${index}-${index+numLines-1}`]});
         index += slidingWindow;
     }
-    console.log("Chunks are stored")
+    console.log("Chunks are stored",  numLines, slidingWindow)
 }
 
 const storeChunks = async (id, lines) => {
@@ -185,7 +184,8 @@ const storeChunks = async (id, lines) => {
     const promises = [];
     promises.push(storeChunk(id, lines, 5, 3));
     promises.push(storeChunk(id, lines, 3, 2));
-    promises.push(storeChunk(id, lines, 1, 1))
+    promises.push(storeChunk(id, lines, 1, 1));
+    await Promise.all(promises);
 }
 
 const createCollection = async (id) => {
@@ -206,8 +206,8 @@ const createCollection = async (id) => {
 
 }
 
-const qa = async () => {
-    //console.log('hello qa');
+const questionsToRanges = async () => {
+    //console.log('hello questionsToRanges');
 
     // get questions
     const questions = await sql.questions();
@@ -217,26 +217,36 @@ const qa = async () => {
         // skip over non-wikipedia sources
         if (!id) continue;
         
-        console.log(questions[i]);
-        console.log('id', id);
-
+        console.log(i, id, questions[i].question);
+    
         /**
          * IMPORTANT: REMOVE 
          */ 
-        //let temp = await qdrant.deleteCollection(id);
+        let temp = await qdrant.deleteCollection(id);
 
-        const info = await qdrant.collectionInfo(id);
+        let info = await qdrant.collectionInfo(id);
         let collectionExists = true;
         if (info?.status?.error) collectionExists = false;
 
         if (!collectionExists) await (createCollection(id));
 
-        console.log("ready to query", id, questions[i]);
+        info = await qdrant.getOpenAIContexts(id, questions[i].question, 20);
+        const ranges = [];
+        for (let j = 0; j < info.length; ++j) {
+            ranges.push(info[j].payload.ranges);
+        }
+        
+        await sql.query(`INSERT INTO test (query, result) VALUES (${sql.escape(questions[i].question)}, ${sql.escape(JSON.stringify({id, ranges}))})`);
 
-        const ranges = await qdrant.getOpenAIContexts(id, questions[i].question, 20);
+    }
+}
 
-        console.log('ranges', ranges);
+const questionsToChunks = async () => {
+    const questions = await sql.questions();
+    for (let i = 0; i < questions.length; ++i) {
+        const { id, question, source } = questions[i];
 
+        
         break;
     }
 }
@@ -250,4 +260,5 @@ const qa = async () => {
 //test('https://en.wikipedia.org/wiki/Evolution');
 
 
-qa();
+//questionsToRanges();
+questionsToChunks();

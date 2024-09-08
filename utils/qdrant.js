@@ -23,7 +23,7 @@ exports.getOpenAIContexts = async (collectionName, query, limit = 3) => {
 
     const vector = await openai.getEmbedding(OPEN_AI_KEY, query);
  
-    console.log('vector.length', vector.length)
+    //console.log('vector.length', vector.length)
 
     const request = {
         url: `http://127.0.0.1:6333/collections/${collectionName}/points/search`,
@@ -45,7 +45,7 @@ exports.getOpenAIContexts = async (collectionName, query, limit = 3) => {
         response = await axios(request);
         //console.log(response.data);
         const results = response.data.result;
-        console.log('results', results);
+        //console.log('results', results);
         const contextIds = [];
         for (let i = 0; i < results.length; ++i) {
             contextIds.push({id: results[i].id, payload: results[i].payload ? results[i].payload : {}});
