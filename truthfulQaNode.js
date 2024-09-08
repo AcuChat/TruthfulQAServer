@@ -9,6 +9,8 @@ const wikipedia = require('./utils/wikipedia');
 const steps = require('./utils/steps');
 const qdrant = require('./utils/qdrant');
 
+const cohere = require('./utils/cohere');
+
 const fs = require ('fs');
 
 const { v4: uuidv4 } = require('uuid');
